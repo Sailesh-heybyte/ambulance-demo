@@ -95,7 +95,7 @@ const [sharedIds, setSharedIds] = useState([]); // contacts already messaged
     const timer = setInterval(() => setTripIdx((i) => (i < STEPS ? i + 1 : i)), 2000);
     return () => clearInterval(timer);
   }, [step, status]);
-
+const [shareNote, setShareNote] = useState('');
   // No booking (cancelled, finished or old data): go back home
   if (!booking || !patient) return <Navigate to="/" replace />;
   // Which route and progress to show for the current status
@@ -151,11 +151,24 @@ const [sharedIds, setSharedIds] = useState([]); // contacts already messaged
   };
 
   // The existing "Share" button: phone share sheet, or WhatsApp as a fallback
+   // Opens the phone's own share sheet (WhatsApp, Instagram, Mail, Messages...)
   const handleShare = async () => {
     const text = buildShareText();
+
     if (navigator.share) {
-      try { await navigator.share({ text }); } catch { /* person closed it */ }
-    } else {
+      try {
+        await navigator.share({ title: 'Ambulance on the way', text });
+      } catch {
+        /* the person closed the share sheet */
+      }
+      return;
+    }
+
+    // Browsers with no share sheet (most desktops): copy the message instead
+    try {
+      await navigator.clipboard.writeText(text);
+      setShareNote('Message copied. Paste it in any app.');
+    } catch {
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     }
   };
@@ -279,39 +292,46 @@ const [sharedIds, setSharedIds] = useState([]); // contacts already messaged
               <i className="bi bi-people-fill" /> Share with family &amp; friends
             </h4>
             <p className="share__hint">
-              They get the ambulance location, your pickup point and the driver details.
+              Choose any app: WhatsApp, Instagram, Messages, Mail and more.
             </p>
 
-            {contacts.length === 0 ? (
+            <button className="share__main" onClick={handleShare}>
+              <i className="bi bi-share-fill" /> Share ambulance location
+            </button>
+            {shareNote && <p className="share__note">{shareNote}</p>}
+
+            {contacts.length > 0 ? (
+              <>
+                <p className="share__or">or send directly to</p>
+                <div className="share__list">
+                  {contacts.map((c) => {
+                    const sent = sharedIds.includes(c.id);
+                    return (
+                      <button key={c.id} className="share__row" onClick={() => shareWithContact(c)}>
+                        <span className="share__avatar">{c.name.charAt(0)}</span>
+                        <span className="share__who">
+                          <strong>{c.name}</strong>
+                          <small>{c.relation || c.phone}</small>
+                        </span>
+                        <span className={`share__send ${sent ? 'is-sent' : ''}`}>
+                          {sent ? (
+                            <><i className="bi bi-check2" /> Sent</>
+                          ) : (
+                            <><i className="bi bi-whatsapp" /> Send</>
+                          )}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
               <button className="share__add" onClick={() => navigate('/profile')}>
                 <i className="bi bi-person-plus-fill" /> Add emergency contacts
               </button>
-            ) : (
-              <div className="share__list">
-                {contacts.map((c) => {
-                  const sent = sharedIds.includes(c.id);
-                  return (
-                    <button key={c.id} className="share__row" onClick={() => shareWithContact(c)}>
-                      <span className="share__avatar">{c.name.charAt(0)}</span>
-                      <span className="share__who">
-                        <strong>{c.name}</strong>
-                        <small>{c.relation || c.phone}</small>
-                      </span>
-                      <span className={`share__send ${sent ? 'is-sent' : ''}`}>
-                        {sent ? (
-                          <><i className="bi bi-check2" /> Sent</>
-                        ) : (
-                          <><i className="bi bi-whatsapp" /> Send</>
-                        )}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
             )}
           </div>
-        )}
-
+        )} 
         <button
           className="track__aid"
           onClick={() => navigate('/first-aid', { state: { id: booking.type } })}
