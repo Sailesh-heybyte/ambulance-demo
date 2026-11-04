@@ -242,7 +242,7 @@ export default function Crew() {
         <span className="crew__tag">{typeLabel}</span>
         <p><i className="bi bi-geo-alt-fill" /> {booking.pickup.address}</p>
         <p><i className="bi bi-pin-map-fill" /> Landmark:{booking.pickup.name}</p>
-        {status !== 'reached' && (
+        {status === 'picked' && (
           <p><i className="bi bi-hospital-fill" /> Hospital: {booking.hospital}</p>
         )}
         {condLabel && (

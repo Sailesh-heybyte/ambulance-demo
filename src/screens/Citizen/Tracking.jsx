@@ -27,6 +27,9 @@ export default function Tracking() {
 
    const unit = booking?.status === 'requested' ? null : booking?.ambulance;
   const spot = booking?.pickup;
+  // The crew picks the hospital when the patient is picked up.
+  // Before that the saved hospital is only a suggestion, so do not show it.
+  const hospitalChosen = status === 'picked' || status === 'hospital';
   const hospital = hospitals.find((h) => h.id === booking?.hospitalId);
 
   const start = unit ? [unit.lat, unit.lng] : null;
@@ -146,7 +149,7 @@ export default function Tracking() {
         </button>
 
         <div className="confirmed__art">
-          <AmbulanceArt />
+        <AmbulanceArt />
         </div>
 
         <div className="confirmed__text">
@@ -179,7 +182,7 @@ export default function Tracking() {
         path={route.points}
         progress={progress}
         patient={patient}
-        hospital={hospital && { name: hospital.name, position: hospitalPos }}
+        hospital={hospitalChosen && hospital ? { name: hospital.name, position: hospitalPos } : null}
       />
 
       <button className="track__back" onClick={() => setStep('confirmed')}>
@@ -217,9 +220,11 @@ export default function Tracking() {
           </div>
         </div>
 
-        <p className="track__hospital">
-          <i className="bi bi-hospital-fill" /> Going to: {booking.hospital}
-        </p>
+        {hospitalChosen && (
+          <p className="track__hospital">
+            <i className="bi bi-hospital-fill" /> Going to: {booking.hospital}
+          </p>
+        )}
 
         <div className="track__buttons">
           <button className="track__call" onClick={handleCall}>
@@ -240,12 +245,12 @@ export default function Tracking() {
           <i className="bi bi-heart-pulse-fill" /> First aid tips while you wait
         </button>
 
-       <button
-  className="confirmed__link track__cancel"
-  onClick={status === 'hospital' ? handleDone : handleCancel}
->
-  {status === 'hospital' ? 'Done' : 'Cancel request'}
-</button>
+        <button
+          className={`track__cancel ${status === 'hospital' ? 'track__cancel--done' : ''}`}
+          onClick={status === 'hospital' ? handleDone : handleCancel}
+        >
+          {status === 'hospital' ? 'Done' : 'Cancel request'}
+        </button>
       </div>
     </div>
   );

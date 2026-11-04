@@ -9,24 +9,37 @@
   background: linear-gradient(180deg, $primary 0%, $primary-dark 100%);
   color: $white;
   text-align: center;
+  overflow: hidden;
 
-  &__logo {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.18);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 56px;
-    animation: splash-pop 0.8s ease-out;
+  &__art {
+    width: 100%; // full width, so the shape touches the left edge
+
+    .ambulance-art__car {
+      animation: splash-drive 1s cubic-bezier(0.15, 0.85, 0.3, 1) both;
+    }
   }
 
-  h1 { margin: 24px 0 4px; font-size: 30px; }
-  p { margin: 0; opacity: 0.85; font-size: 15px; }
+  h1 {
+    margin: 8px 0 4px;
+    font-size: 30px;
+    animation: splash-fade 0.6s ease-out 0.7s both;
+  }
+
+  p {
+    margin: 0;
+    opacity: 0.85;
+    font-size: 15px;
+    animation: splash-fade 0.6s ease-out 0.9s both;
+  }
 }
 
-@keyframes splash-pop {
-  0% { transform: scale(0.6); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+@keyframes splash-drive {
+  0%   { transform: translateX(-1100px); }
+  75%  { transform: translateX(14px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes splash-fade {
+  0%   { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
 }

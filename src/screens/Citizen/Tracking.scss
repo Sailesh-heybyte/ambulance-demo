@@ -11,6 +11,8 @@
   color: $white;
 
   &__back {
+        position: relative;
+    z-index: 2;
     width: 36px;
     height: 36px;
     border-radius: 50%;
@@ -19,17 +21,10 @@
     font-size: 16px;
   }
 
-  &__art {
-    margin: 40px auto 0;
-    width: 260px;
-    height: 190px;
-    border-radius: 58% 42% 52% 48% / 52% 48% 52% 48%; // soft blob shape
-    background: rgba(255, 255, 255, 0.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+     &__art {
+    margin: -20px 0 0 -24px;
+    width: 88%;
   }
-
   &__text {
     margin-top: 40px;
 
@@ -208,9 +203,24 @@
     i { color: $primary; margin-right: 4px; }
   }
   &__cancel {
-    display: block;
-    margin: 14px auto 0;
-    color: $muted;
+    width: 100%;
+    margin-top: 12px;
+    padding: 13px;
+    border-radius: $radius-md;
+    background: $white;
+    color: $primary;
+    border: 1.5px solid $primary;
+    font-size: 14px;
+    font-weight: 700;
+
+    &:active { background: $primary-light; }
+
+    // "Done" at the end of the trip is the main action, so fill it
+    &--done {
+      background: $green;
+      border-color: $green;
+      color: $white;
+    }
   }
 }
 
