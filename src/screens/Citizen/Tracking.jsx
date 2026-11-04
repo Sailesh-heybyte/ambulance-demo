@@ -93,11 +93,15 @@ export default function Tracking() {
   }, [step, status]);
 
   // No booking (cancelled, finished or old data): go back home
-  if (!booking || !patient || !start) return <Navigate to="/" replace />;
-
+  if (!booking || !patient) return <Navigate to="/" replace />;
   // Which route and progress to show for the current status
   const onTrip = status === 'picked' || status === 'hospital';
-  const route = onTrip ? toHospital : toPatient;
+   const current = onTrip ? toHospital : toPatient;
+  // Straight line until the real road has loaded
+  const route =
+    current.points.length > 1
+      ? current
+      : { ...current, points: onTrip ? [patient, hospitalPos] : [start, patient] };
   const progress = onTrip
     ? (status === 'hospital' ? STEPS : tripIdx) / STEPS
     : (status === 'reached' ? STEPS : pickupIdx) / STEPS;
@@ -129,8 +133,8 @@ export default function Tracking() {
     navigate('/');
   };
 
-  // ---------- Stage 1: red confirmation screen ----------
-  if (step === 'confirmed') {
+   // No driver yet? Stay on this screen and show no driver details.
+  if (step === 'confirmed' || !unit) {
     return (
       <div className="confirmed">
         <button className="confirmed__back" onClick={handleCancel}>
@@ -142,16 +146,19 @@ export default function Tracking() {
         </div>
 
         <div className="confirmed__text">
-          <h1>Ambulance and responders are on a way</h1>
+                   <h1>
+            {unit ? 'Ambulance and responders are on a way' : 'Looking for the nearest ambulance'}
+          </h1>
           <p>
-            Stay calm and speak gently to the patient until help arrives.
-            The nearest ambulance has been alerted.
+            {unit
+              ? 'Stay calm and speak gently to the patient until help arrives. The nearest ambulance has been alerted.'
+              : 'Your request has been sent to all ambulances on duty. Stay calm and speak gently to the patient. Driver details will appear here as soon as a driver accepts.'}
           </p>
         </div>
 
         <div className="confirmed__actions">
-          <button className="confirmed__primary" onClick={() => setStep('map')}>
-            See responders on map
+                   <button className="confirmed__primary" disabled={!unit} onClick={() => setStep('map')}>
+            {unit ? 'See responders on map' : 'Waiting for a driver…'}
           </button>
           <button className="confirmed__link" onClick={handleCancel}>
             Cancel request

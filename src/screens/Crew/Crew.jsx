@@ -7,6 +7,8 @@ import { conditions } from '../../mock/conditions';
 import HospitalPicker from './HospitalPicker';
 import useGpsPublisher from '../../hooks/useGpsPublisher';
 import './Crew.scss';
+import { ambulanceUnits } from '../../mock/ambulance';
+import { distanceKm } from '../../utils/geo';
 import { useStaff } from '../../context/StaffAuthContext';
 const QUEUE_KEY = 'ambulance_crew_queue';
 
@@ -48,11 +50,17 @@ function StatusBar({ network, gps }) {
 }
 
 export default function Crew() {
-   const { booking: anyBooking, updateStatus,updateBooking, clearBooking } = useBooking();
+   const { booking: anyBooking, acceptBooking,updateStatus,updateBooking, clearBooking } = useBooking();
   const { crew, logout } = useStaff();
 
-  // Only show a job if it was sent to THIS crew's ambulance
-  const booking = anyBooking?.ambulance?.id === crew.unitId ? anyBooking : null;
+   const [declined, setDeclined] = useState(null); // the request this driver said no to
+  const myUnit = ambulanceUnits.find((u) => u.id === crew.unitId);
+
+  // A new request is shown to every driver on duty. Once one driver
+  // accepts, only that driver keeps seeing it.
+  const open = anyBooking?.status === 'requested' && anyBooking.requestedAt !== declined;
+  const mine = anyBooking?.ambulance?.id === crew.unitId;
+  const booking = open || mine ? anyBooking : null;
   const network = useOnline();
   const [onDuty, setOnDuty] = useState(false);
  
@@ -135,6 +143,13 @@ export default function Crew() {
     alert('Calling the caller through a masked number.');
   };
   const confirmPickup = (choice) => updateBooking({ ...choice, status: 'picked' });
+   const accept = () => {
+    if (!myUnit) return;
+    const km = distanceKm([myUnit.lat, myUnit.lng], [booking.pickup.lat, booking.pickup.lng]);
+    if (!acceptBooking(myUnit, km)) {
+      alert('Another driver has already accepted this request.');
+    }
+  };
   const bar = <StatusBar network={network} gps={gps} />;
 
   // ---------- 1. Off duty ----------
@@ -164,7 +179,12 @@ export default function Crew() {
   }
 
   // ---------- 3. New job alert ----------
-  if (status === 'requested') {
+ 
+   if (status === 'requested') {
+    const kmAway = myUnit
+      ? distanceKm([myUnit.lat, myUnit.lng], [booking.pickup.lat, booking.pickup.lng])
+      : null;
+
     return (
       <div className="alert">
         {bar}
@@ -173,18 +193,20 @@ export default function Crew() {
         <div className="alert__card">
           <h2>{typeLabel}</h2>
           <p><i className="bi bi-geo-alt-fill" /> {booking.pickup.address}</p>
-          <p><i className="bi bi-signpost-fill" /> {booking.distanceText}</p>
+          {kmAway !== null && (
+            <p><i className="bi bi-signpost-fill" /> {kmAway.toFixed(1)} km away</p>
+          )}
           <p>For: {booking.forWhom === 'me' ? 'The caller' : 'Someone else'}</p>
         </div>
         <div className="alert__buttons">
-          <button className="alert__reject" disabled={!network} onClick={clearBooking}>
+                  <button
+            className="alert__reject"
+            disabled={!network}
+            onClick={() => setDeclined(booking.requestedAt)}
+          >
             Reject
           </button>
-          <button
-            className="alert__accept"
-            disabled={!network}
-            onClick={() => updateStatus('accepted')}
-          >
+          <button className="alert__accept" disabled={!network} onClick={accept}>
             Accept
           </button>
         </div>

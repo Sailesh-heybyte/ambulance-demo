@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { recommendHospital } from '../utils/beds';
-import { getPickup, nearestAmbulance } from '../utils/dispatch';
+import { getPickup } from '../utils/dispatch';
 import { getProfile } from '../utils/profile';
 const KEY = 'ambulance_booking';
 const BookingContext = createContext(null);
@@ -31,18 +31,19 @@ export function BookingProvider({ children }) {
     else localStorage.removeItem(KEY);
   };
 
-    const createBooking = ({ type, forWhom }) => {
+   const createBooking = ({ type, forWhom }) => {
     const pickup = getPickup();
-    const unit = nearestAmbulance(pickup);
     const hospital = recommendHospital(type, [pickup.lat, pickup.lng]);
     const profile = getProfile();
     const d = new Date();
     const tripId = `RJY-${String(d.getDate()).padStart(2, '0')}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getFullYear()).slice(2)}-${Math.floor(1000 + Math.random() * 9000)}`;
+
     save({
       type,
       forWhom,
       status: 'requested',
-            tripId,
+      tripId,
+      requestedAt: Date.now(),
       hospital: hospital.name,
       hospitalId: hospital.id,
       pickup: {
@@ -52,6 +53,20 @@ export function BookingProvider({ children }) {
         lat: pickup.lat,
         lng: pickup.lng,
       },
+      ambulance: null, // filled in by the first driver who accepts
+      notified: profile.contacts.map((c) => c.name),
+      abha: profile.abha,
+    });
+  };
+
+  // The first driver to accept gets the job. It reads the newest saved
+  // booking, so a second driver who taps Accept a moment later is refused.
+  const acceptBooking = (unit, km) => {
+    const latest = read();
+    if (!latest || latest.status !== 'requested') return false;
+    save({
+      ...latest,
+      status: 'accepted',
       ambulance: {
         id: unit.id,
         station: unit.station,
@@ -60,10 +75,9 @@ export function BookingProvider({ children }) {
         lat: unit.lat,
         lng: unit.lng,
       },
-      distanceText: `${unit.km.toFixed(1)} km away`,
-      notified: profile.contacts.map((c) => c.name),
-      abha: profile.abha,
+      distanceText: `${km.toFixed(1)} km away`,
     });
+    return true;
   };
   const updateStatus = (status) => save({ ...booking, status });
    const updateBooking = (patch) => save({ ...booking, ...patch });
@@ -71,7 +85,7 @@ export function BookingProvider({ children }) {
 
   return (
     <BookingContext.Provider
-      value={{ booking, createBooking, updateStatus,updateBooking, clearBooking }}
+      value={{ booking, createBooking,acceptBooking, updateStatus,updateBooking, clearBooking }}
     >
       {children}
     </BookingContext.Provider>
