@@ -2,8 +2,10 @@
 @use '../../styles/variables' as *;
 
 .portal {
-  min-height: 100dvh;
-  padding: 24px;
+   min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 24px calc(24px + env(safe-area-inset-bottom));
   background: $background;
 
   &__header {
@@ -12,6 +14,7 @@
     gap: 14px;
     max-width: 1000px;
     margin: 0 auto 24px;
+        width: 100%;
 
     h1 { margin: 0; font-size: 22px; }
     p { margin: 2px 0 0; color: $muted; font-size: 14px; }
@@ -28,15 +31,34 @@
     justify-content: center;
     font-size: 24px;
   }
+   &__footer {
+    width: 100%;
+    max-width: 1000px;
+    margin: auto auto 0; // pushes the footer to the bottom of the screen
+    padding-top: 28px;
+    display: flex;
+    justify-content: center;
+  }
+
   &__logout {
-    margin-left: auto;
-    padding: 10px 16px;
-    border-radius: $radius-sm;
+    min-width: 200px;
+    padding: 13px 28px;
+    border-radius: $radius-md;
     background: $white;
     color: $primary-dark;
-    font-size: 14px;
+    border: 1.5px solid $primary;
+    font-size: 15px;
     font-weight: 700;
-    box-shadow: $shadow-card;
+
+    i { margin-right: 6px; }
+
+    &:hover {
+      background: $primary-light;
+    }
+
+    @media (max-width: 800px) {
+      width: 100%;
+    }
   }
   &__grid {
     display: grid;
@@ -44,6 +66,7 @@
     gap: 20px;
     max-width: 1000px;
     margin: 0 auto;
+        width: 100%;
 
     @media (max-width: 800px) {
       grid-template-columns: 1fr;

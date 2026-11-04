@@ -16,5 +16,6 @@ export async function fetchRoute(from, to) {
     // OSRM gives [lng, lat], Leaflet needs [lat, lng]
     points: route.geometry.coordinates.map(([lng, lat]) => [lat, lng]),
     minutes: Math.max(1, Math.round(route.duration / 60)),
+   km: route.distance / 1000,
   };
 }

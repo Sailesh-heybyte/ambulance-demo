@@ -57,6 +57,9 @@ html, body {
   &--patient {
     background: #1f2937;
   }
+    &--hospital {
+    background: $green;
+  }
 }
 // Map labels like "You are here"
 .map-label {

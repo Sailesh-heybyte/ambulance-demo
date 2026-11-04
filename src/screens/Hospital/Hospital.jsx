@@ -7,7 +7,7 @@ import { user } from '../../mock/user';
 import './Hospital.scss';
 import { useStaff } from '../../context/StaffAuthContext';
 import { formatAbha } from '../../utils/profile';
-
+import { conditions } from '../../mock/conditions';
 const STATUS_TEXT = {
   accepted: 'Ambulance dispatched',
   reached: 'Ambulance has reached the patient',
@@ -38,16 +38,14 @@ export default function Hospital() {
       ? booking
       : null;
   const typeLabel = emergencyTypes.find((t) => t.id === incoming?.type)?.label;
-  const needed = incoming ? facilityLabels[neededFacility[incoming.type]] : '';
-
+   const needed = incoming ? facilityLabels[incoming.bedNeeded || neededFacility[incoming.type]] : '';
+  const condition = conditions.find((c) => c.id === incoming?.condition);
   return (
     <div className="portal">
       <header className="portal__header">
         <div className="portal__logo"><i className="bi bi-hospital-fill" /></div>
         <div>
-                  <button className="portal__logout" onClick={() => logout('hospital')}>
-          <i className="bi bi-box-arrow-right" /> Log out
-        </button>
+                
           <h1>{me.name}</h1>
           <p>Emergency department portal</p>
         </div>
@@ -72,7 +70,8 @@ export default function Hospital() {
               <dl className="incoming__details">
                 <div><dt>Patient</dt><dd>{incoming.forWhom === 'me' ? user.name : 'Someone else (caller booked)'}</dd></div>
                <div><dt>Pick-up</dt><dd>{incoming.pickup?.address}</dd></div>
-                <div><dt>Bed needed</dt><dd>{needed}</dd></div>
+                               <div><dt>Condition</dt><dd>{condition ? condition.label : 'Not set yet'}</dd></div>
+               <div><dt>Bed needed</dt><dd>{needed}</dd></div>
                               <div><dt>ABHA ID</dt><dd>{incoming.abha ? formatAbha(incoming.abha) : 'Not shared'}</dd></div>
               </dl>
 
@@ -107,6 +106,11 @@ export default function Hospital() {
             ))}
           </div>
         </section>
+      </div>
+            <div className="portal__footer">
+        <button className="portal__logout" onClick={() => logout('hospital')}>
+          <i className="bi bi-box-arrow-right" /> Log out
+        </button>
       </div>
     </div>
   );

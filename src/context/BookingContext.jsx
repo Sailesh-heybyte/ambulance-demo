@@ -64,11 +64,12 @@ export function BookingProvider({ children }) {
     });
   };
   const updateStatus = (status) => save({ ...booking, status });
+   const updateBooking = (patch) => save({ ...booking, ...patch });
   const clearBooking = () => save(null);
 
   return (
     <BookingContext.Provider
-      value={{ booking, createBooking, updateStatus, clearBooking }}
+      value={{ booking, createBooking, updateStatus,updateBooking, clearBooking }}
     >
       {children}
     </BookingContext.Provider>
