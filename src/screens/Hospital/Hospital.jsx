@@ -5,6 +5,7 @@ import { hospitals, facilityLabels, neededFacility, prepNotes } from '../../mock
 import { getBeds, saveBeds } from '../../utils/beds';
 import { user } from '../../mock/user';
 import './Hospital.scss';
+import TripProgress from '../../components/TripProgress';
 import { useStaff } from '../../context/StaffAuthContext';
 import { formatAbha } from '../../utils/profile';
 import { conditions } from '../../mock/conditions';
@@ -66,7 +67,7 @@ export default function Hospital() {
                 <span className="incoming__type">{typeLabel}</span>
                 <span className="incoming__status">{STATUS_TEXT[incoming.status]}</span>
               </div>
-
+              <TripProgress status={incoming.status} />
               <dl className="incoming__details">
                 <div><dt>Patient</dt><dd>{incoming.forWhom === 'me' ? user.name : 'Someone else (caller booked)'}</dd></div>
                <div><dt>Pick-up</dt><dd>{incoming.pickup?.address}</dd></div>

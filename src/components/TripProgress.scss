@@ -1,0 +1,31 @@
+@use '../styles/colors' as *;
+
+.trip-progress {
+  display: flex;
+  gap: 6px;
+  margin: 14px 0 4px;
+
+  &__step {
+    flex: 1;
+
+    small {
+      display: block;
+      margin-top: 6px;
+      font-size: 11px;
+      color: $muted;
+    }
+
+    &.is-done small { color: $green-dark; font-weight: 700; }
+    &.is-now small { color: $text; font-weight: 700; }
+  }
+
+  &__bar {
+    display: block;
+    height: 4px;
+    border-radius: 2px;
+    background: #e5e7eb;
+  }
+
+  &__step.is-done &__bar { background: $green; }
+  &__step.is-now &__bar { background: $blue; }
+}

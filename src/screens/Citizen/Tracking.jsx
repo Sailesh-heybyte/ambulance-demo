@@ -7,7 +7,7 @@ import { useDriverLocationAge } from '../../hooks/useGpsPublisher';
 import { hospitals } from '../../mock/hospitals';
 import { fetchRoute } from '../../utils/route';
 import './Tracking.scss';
-
+import TripProgress from '../../components/TripProgress';
 const STEPS = 30; // each route is walked in 30 steps, one every 2 seconds
 const FALLBACK_MINUTES = 8;
 
@@ -180,7 +180,7 @@ export default function Tracking() {
           <h3>{TITLES[status]}</h3>
           <span className="track__eta">{etaText}</span>
         </div>
-
+        <TripProgress status={status} />
         <p className="track__notified">
           <i className="bi bi-bell-fill" />{' '}
           {booking.notified?.length

@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useBooking } from '../../context/BookingContext';
 import useOnline from '../../hooks/useOnline';
-import useGpsPublisher from '../../hooks/useGpsPublisher';
 import { emergencyTypes } from '../../mock/emergencies';
 import { hospitals, facilityLabels } from '../../mock/hospitals';
 import { conditions } from '../../mock/conditions';
 import HospitalPicker from './HospitalPicker';
-import CrewRoute from './CrewRoute';
+import useGpsPublisher from '../../hooks/useGpsPublisher';
 import './Crew.scss';
 import { useStaff } from '../../context/StaffAuthContext';
 const QUEUE_KEY = 'ambulance_crew_queue';
@@ -56,7 +55,7 @@ export default function Crew() {
   const booking = anyBooking?.ambulance?.id === crew.unitId ? anyBooking : null;
   const network = useOnline();
   const [onDuty, setOnDuty] = useState(false);
-   const [tab, setTab] = useState('details'); // 'details' or 'route'
+ 
   const [queued, setQueued] = useState(() => localStorage.getItem(QUEUE_KEY));
   const audioRef = useRef(null);
   const gps = useGpsPublisher(onDuty);
@@ -64,7 +63,7 @@ export default function Crew() {
   // A status tapped while offline is shown right away, but not yet sent
   const status = (booking && queued) || booking?.status;
   const typeLabel = emergencyTypes.find((t) => t.id === booking?.type)?.label;
-
+ 
   // Send the saved status to the citizen and hospital
   const syncQueue = () => {
     const next = localStorage.getItem(QUEUE_KEY);
@@ -211,77 +210,29 @@ export default function Crew() {
     // ---------- 4. Active trip ----------
   const action = NEXT[status];
   const condLabel = conditions.find((c) => c.id === booking.condition)?.label;
-  const hospitalPos = hospitals.find((h) => h.id === booking.hospitalId);
-
-  // Route tab: to the patient first, then to the hospital
-  const toHospital = status === 'picked';
-  const routeFrom = toHospital
-    ? [booking.pickup.lat, booking.pickup.lng]
-    : [booking.ambulance.lat, booking.ambulance.lng];
-  const routeTo = toHospital && hospitalPos
-    ? [hospitalPos.lat, hospitalPos.lng]
-    : [booking.pickup.lat, booking.pickup.lng];
 
   return (
-    <div className="crew">
+    <div className={`crew ${!network ? 'crew--offline' : ''}`}>
       {bar}
       <h2 className="crew__title">Active trip</h2>
 
-      <div className="crew__tabs">
-        <button
-          className={`crew__tab ${tab === 'details' ? 'is-on' : ''}`}
-          onClick={() => setTab('details')}
-        >
-          <i className="bi bi-card-list" /> Details
-        </button>
-        <button
-          className={`crew__tab crew__tab--route ${tab === 'route' ? 'is-on' : ''}`}
-          onClick={() => setTab('route')}
-        >
-          <i className="bi bi-signpost-split-fill" /> Route
-        </button>
+      <div className="crew__card">
+        <span className="crew__tag">{typeLabel}</span>
+        <p><i className="bi bi-geo-alt-fill" /> {booking.pickup.address}</p>
+        <p><i className="bi bi-pin-map-fill" /> Landmark:{booking.pickup.name}</p>
+        {status !== 'reached' && (
+          <p><i className="bi bi-hospital-fill" /> Hospital: {booking.hospital}</p>
+        )}
+        {condLabel && (
+          <p>
+            <i className="bi bi-activity" /> Condition: {condLabel}
+            {booking.bedNeeded ? ` · ${facilityLabels[booking.bedNeeded]} bed` : ''}
+          </p>
+        )}
       </div>
 
-      {tab === 'route' && (
-        <CrewRoute
-          key={`${routeFrom}-${routeTo}`}
-          from={routeFrom}
-          to={routeTo}
-          title={toHospital ? `To ${booking.hospital}` : 'To the patient'}
-          fromPin={
-            toHospital
-              ? { cls: 'map-pin--patient', icon: 'bi-person-fill' }
-              : { cls: 'map-pin--ambulance', icon: 'bi-truck-front-fill' }
-          }
-          toPin={
-            toHospital
-              ? { cls: 'map-pin--hospital', icon: 'bi-hospital-fill' }
-              : { cls: 'map-pin--patient', icon: 'bi-person-fill' }
-          }
-        />
-      )}
-
-      {tab === 'details' && (
-        <>
-          <div className="crew__card">
-            <span className="crew__tag">{typeLabel}</span>
-            <p><i className="bi bi-geo-alt-fill" /> {booking.pickup.address}</p>
-            <p><i className="bi bi-pin-map-fill" /> Landmark:{booking.pickup.name}</p>
-            {status !== 'reached' && (
-              <p><i className="bi bi-hospital-fill" /> Hospital: {booking.hospital}</p>
-            )}
-            {condLabel && (
-              <p>
-                <i className="bi bi-activity" /> Condition: {condLabel}
-                {booking.bedNeeded ? ` · ${facilityLabels[booking.bedNeeded]} bed` : ''}
-              </p>
-            )}
-          </div>
-
-          {status === 'reached' && (
-            <HospitalPicker booking={booking} disabled={!network} onConfirm={confirmPickup} />
-          )}
-        </>
+      {status === 'reached' && (
+        <HospitalPicker booking={booking} disabled={!network} onConfirm={confirmPickup} />
       )}
 
       <div className="crew__row">
@@ -302,12 +253,6 @@ export default function Crew() {
       {action && (
         <button className="crew__big crew__big--bottom" onClick={() => handleStatus(action.next)}>
           {action.label}
-        </button>
-      )}
-
-      {status === 'reached' && tab === 'route' && (
-        <button className="crew__big crew__big--green crew__big--bottom" onClick={() => setTab('details')}>
-          Choose hospital & condition
         </button>
       )}
     </div>

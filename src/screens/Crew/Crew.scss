@@ -3,7 +3,7 @@
 
 .crew {
   min-height: 100dvh;
-    padding: 76px 20px 24px;
+     padding: 56px 20px 24px;
   display: flex;
   flex-direction: column;
   background: $background;
@@ -102,7 +102,7 @@
 // Full-screen job alert
 .alert {
   min-height: 100dvh;
-    padding: 88px 24px 24px;
+     padding: 64px 24px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -173,7 +173,7 @@
   font-weight: 600;
 
   &__offline {
-    padding: 7px 14px;
+    padding: 92px;
     background: #1f2937;
     color: $white;
   }
@@ -206,72 +206,9 @@
   opacity: 0.45;
   box-shadow: none;
 }
-// ---------- Tabs (Details / green Route) ----------
-.crew__tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 14px;
-}
 
-.crew__tab {
-  flex: 1;
-  padding: 11px;
-  border-radius: $radius-md;
-  background: $white;
-  color: $muted;
-  border: 1.5px solid #e5e7eb;
-  font-size: 14px;
-  font-weight: 700;
 
-  i { margin-right: 6px; }
 
-  &.is-on {
-    background: $primary-light;
-    color: $primary-dark;
-    border-color: $primary;
-  }
-
-  &--route {
-    color: $green-dark;
-    border-color: $green;
-
-    &.is-on {
-      background: $green;
-      color: $white;
-      border-color: $green;
-    }
-  }
-}
-
-// ---------- Route map ----------
-.croute {
-  &__head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 14px;
-    border-radius: $radius-md $radius-md 0 0;
-    background: $green-light;
-    color: $green-dark;
-    font-size: 14px;
-  }
-
-  &__warn {
-    margin: 0;
-    padding: 8px 14px;
-    background: $orange-light;
-    color: #92400e;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  &__map {
-    height: 340px;
-    border-radius: 0 0 $radius-md $radius-md;
-    overflow: hidden;
-    z-index: 0;
-  }
-}
 
 // ---------- Condition + hospital picker ----------
 .pick {

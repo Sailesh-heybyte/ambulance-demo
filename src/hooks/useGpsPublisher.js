@@ -77,3 +77,14 @@ export default function useGpsPublisher(active) {
     ageSec: lastAt ? Math.max(0, Math.round((now - lastAt) / 1000)) : null,
   };
 }
+// Used on the crew screen: the driver's latest saved position, refreshed every 3 seconds
+export function useCrewPosition() {
+  const [pos, setPos] = useState(getCrewLocation);
+
+  useEffect(() => {
+    const id = setInterval(() => setPos(getCrewLocation()), 3000);
+    return () => clearInterval(id);
+  }, []);
+
+  return pos; // { lat, lng, ... } or null
+}

@@ -36,11 +36,13 @@ export function BookingProvider({ children }) {
     const unit = nearestAmbulance(pickup);
     const hospital = recommendHospital(type, [pickup.lat, pickup.lng]);
     const profile = getProfile();
-
+    const d = new Date();
+    const tripId = `RJY-${String(d.getDate()).padStart(2, '0')}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getFullYear()).slice(2)}-${Math.floor(1000 + Math.random() * 9000)}`;
     save({
       type,
       forWhom,
       status: 'requested',
+            tripId,
       hospital: hospital.name,
       hospitalId: hospital.id,
       pickup: {
