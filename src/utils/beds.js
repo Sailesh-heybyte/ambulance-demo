@@ -1,11 +1,14 @@
 import { hospitals, defaultBeds, neededFacility } from '../mock/hospitals';
+import { distanceKm } from './geo';
 
 const KEY = 'ambulance_beds';
 
 export function getBeds() {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY));
-    if (saved) return saved;
+    // Start from the defaults, then apply anything saved. This way a
+    // hospital missing from old saved data still gets its default beds.
+    if (saved) return { ...defaultBeds, ...saved };
   } catch {
     // ignore and use the defaults
   }
@@ -16,11 +19,16 @@ export function saveBeds(beds) {
   localStorage.setItem(KEY, JSON.stringify(beds));
 }
 
-// Nearest hospital that has a free bed of the type this emergency needs
-export function recommendHospital(typeId) {
+// Nearest hospital to the patient that has a free bed this emergency needs.
+// "from" is the patient's [lat, lng].
+export function recommendHospital(typeId, from) {
   const beds = getBeds();
   const need = neededFacility[typeId] || 'icu';
-  const byDistance = [...hospitals].sort((a, b) => a.distanceKm - b.distanceKm);
+
+  const byDistance = hospitals
+    .map((h) => ({ ...h, km: distanceKm(from, [h.lat, h.lng]) }))
+    .sort((a, b) => a.km - b.km);
+
   const withBed = byDistance.filter((h) => beds[h.id]?.[need] > 0);
   return withBed[0] || byDistance[0]; // if none has a bed, use the nearest
 }

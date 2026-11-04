@@ -4,6 +4,9 @@ import { user as mockUser } from '../../mock/user';
 import { useAuth } from '../../context/AuthContext';
 import EmergencySheet from './EmergencySheet';
 import './Home.scss';
+import Sheet from '../../components/Sheet';
+import { pickupSpots } from '../../mock/ambulance';
+import { getPickup, savePickup } from '../../utils/dispatch';
 import { useBooking } from '../../context/BookingContext';
 export default function Home() {
     const { user: account } = useAuth();
@@ -11,7 +14,8 @@ export default function Home() {
   const navigate = useNavigate();
    const { createBooking } = useBooking();
   const [sheetOpen, setSheetOpen] = useState(false);
-
+  const [pickup, setPickup] = useState(getPickup);
+  const [spotOpen, setSpotOpen] = useState(false);
   const handleConfirm = (booking) => {
     createBooking(booking);
     setSheetOpen(false);
@@ -44,15 +48,35 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="address-card">
+            <button className="address-card" onClick={() => setSpotOpen(true)}>
         <div className="address-card__icon">
           <i className="bi bi-geo-alt-fill" />
         </div>
-        <div>
+        <div className="address-card__text">
           <h4>Your current address</h4>
-          <p>{user.address}</p>
+          <p>{pickup.address}</p>
         </div>
-      </section>
+        <span className="address-card__change">Change</span>
+      </button>
+
+      <Sheet open={spotOpen} onClose={() => setSpotOpen(false)} title="Where are you?">
+        <div className="spots">
+          {pickupSpots.map((s) => (
+            <button
+              key={s.id}
+              className={`spots__item ${pickup.id === s.id ? 'spots__item--active' : ''}`}
+              onClick={() => {
+                savePickup(s.id);
+                setPickup(s);
+                setSpotOpen(false);
+              }}
+            >
+              <i className="bi bi-geo-alt-fill" />
+              <span>{s.address}</span>
+            </button>
+          ))}
+        </div>
+      </Sheet>
             <EmergencySheet
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}

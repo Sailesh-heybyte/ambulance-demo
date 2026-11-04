@@ -2,7 +2,7 @@
 @use '../../styles/variables' as *;
 
 .crew {
-  min-height: 100vh;
+  min-height: 100dvh;
     padding: 76px 20px 24px;
   display: flex;
   flex-direction: column;
@@ -94,7 +94,7 @@
 
 // Full-screen job alert
 .alert {
-  min-height: 100vh;
+  min-height: 100dvh;
     padding: 88px 24px 24px;
   display: flex;
   flex-direction: column;

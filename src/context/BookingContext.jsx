@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { recommendHospital } from '../utils/beds';
+import { getPickup, nearestAmbulance } from '../utils/dispatch';
 import { getProfile } from '../utils/profile';
 const KEY = 'ambulance_booking';
 const BookingContext = createContext(null);
@@ -30,17 +31,35 @@ export function BookingProvider({ children }) {
     else localStorage.removeItem(KEY);
   };
 
-  // status: requested -> accepted -> reached -> picked -> hospital
     const createBooking = ({ type, forWhom }) => {
-    const hospital = recommendHospital(type);
+    const pickup = getPickup();
+    const unit = nearestAmbulance(pickup);
+    const hospital = recommendHospital(type, [pickup.lat, pickup.lng]);
     const profile = getProfile();
+
     save({
       type,
       forWhom,
       status: 'requested',
       hospital: hospital.name,
       hospitalId: hospital.id,
-      notified: profile.contacts.map((c) => c.name), // contacts alerted
+      pickup: {
+        id: pickup.id,
+        name: pickup.name,
+        address: pickup.address,
+        lat: pickup.lat,
+        lng: pickup.lng,
+      },
+      ambulance: {
+        id: unit.id,
+        station: unit.station,
+        driver: unit.driver,
+        number: unit.number,
+        lat: unit.lat,
+        lng: unit.lng,
+      },
+      distanceText: `${unit.km.toFixed(1)} km away`,
+      notified: profile.contacts.map((c) => c.name),
       abha: profile.abha,
     });
   };

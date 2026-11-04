@@ -1,15 +1,20 @@
 export const hospitals = [
-  { id: 'care', name: 'Care Hospital, Banjara Hills', distanceKm: 2.4 },
-  { id: 'apollo', name: 'Apollo Hospital, Jubilee Hills', distanceKm: 3.8 },
-  { id: 'yashoda', name: 'Yashoda Hospital, Somajiguda', distanceKm: 5.1 },
+  { id: 'sri-ganga', name: 'Sri Ganga Emergency & Multispeciality Hospital', lat: 17.0065618, lng: 81.7809945 },
+  { id: 'smart', name: 'Smart Emergency Hospitals', lat: 17.0002771, lng: 81.7851625 },
+  { id: 'godavari', name: 'Godavari Hospital, Neuro, Cardiac & Emergency', lat: 17.0140471, lng: 81.7800178 },
+  { id: 'sai', name: 'SAI Hospitals', lat: 17.0118475, lng: 81.7712929 },
+  { id: 'swatantra', name: 'Swatantra Hospital', lat: 17.01437, lng: 81.7775108 },
+  { id: 'govt', name: 'Government District Hospital', lat: 17.0197073, lng: 81.7916304 },
 ];
 
-// Starting bed counts. The Care Hospital has no maternity beds and Apollo has
-// no trauma beds, so you can see the recommendation change.
+// Demo bed counts (change these in the hospital portal)
 export const defaultBeds = {
-  care: { icu: 4, ventilator: 2, trauma: 3, maternity: 0 },
-  apollo: { icu: 6, ventilator: 3, trauma: 0, maternity: 5 },
-  yashoda: { icu: 2, ventilator: 1, trauma: 4, maternity: 2 },
+  'sri-ganga': { icu: 4, ventilator: 2, trauma: 3, maternity: 0 },
+  smart: { icu: 3, ventilator: 2, trauma: 4, maternity: 3 },
+  godavari: { icu: 5, ventilator: 3, trauma: 0, maternity: 0 },
+  sai: { icu: 6, ventilator: 3, trauma: 2, maternity: 5 },
+  swatantra: { icu: 4, ventilator: 2, trauma: 3, maternity: 2 },
+  govt: { icu: 2, ventilator: 1, trauma: 5, maternity: 0 },
 };
 
 export const facilityLabels = {

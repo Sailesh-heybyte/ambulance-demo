@@ -2,7 +2,7 @@
 @use '../../styles/variables' as *;
 
 .signin {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   background: linear-gradient(180deg, $primary 0%, $primary-dark 100%);

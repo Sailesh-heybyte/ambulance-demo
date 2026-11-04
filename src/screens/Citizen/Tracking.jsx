@@ -4,13 +4,12 @@ import TrackingMap from './TrackingMap';
 import AmbulanceArt from '../../components/AmbulanceArt';
 import { useBooking } from '../../context/BookingContext';
 import { useDriverLocationAge } from '../../hooks/useGpsPublisher';
-import { ambulance, routePoints, patientLocation } from '../../mock/ambulance';
+import { hospitals } from '../../mock/hospitals';
 import { fetchRoute } from '../../utils/route';
 import './Tracking.scss';
 
-const STEPS = 30; // the ambulance moves in 30 steps, one every 2 seconds
+const STEPS = 30; // each route is walked in 30 steps, one every 2 seconds
 const FALLBACK_MINUTES = 8;
-const ARRIVED = ['reached', 'picked', 'hospital'];
 
 const TITLES = {
   requested: 'Finding the nearest ambulance…',
@@ -23,46 +22,92 @@ const TITLES = {
 export default function Tracking() {
   const navigate = useNavigate();
   const { booking, clearBooking } = useBooking();
-  const [step, setStep] = useState('confirmed'); // 'confirmed' or 'map'
-  const [index, setIndex] = useState(0);
-  const [route, setRoute] = useState({ points: routePoints, minutes: FALLBACK_MINUTES });
-  const driverAge = useDriverLocationAge();
   const status = booking?.status;
+  const driverAge = useDriverLocationAge();
 
-  // Ask for the real road path once. If it fails, we keep the straight demo line.
+  const unit = booking?.ambulance;
+  const spot = booking?.pickup;
+  const hospital = hospitals.find((h) => h.id === booking?.hospitalId);
+
+  const start = unit ? [unit.lat, unit.lng] : null;
+  const patient = spot ? [spot.lat, spot.lng] : null;
+  const hospitalPos = hospital ? [hospital.lat, hospital.lng] : null;
+
+  const [step, setStep] = useState('confirmed'); // 'confirmed' or 'map'
+  const [pickupIdx, setPickupIdx] = useState(0); // progress: station -> patient
+  const [tripIdx, setTripIdx] = useState(0); // progress: patient -> hospital
+
+  // Until the real roads load, each route is a straight line
+  const [toPatient, setToPatient] = useState({
+    points: start && patient ? [start, patient] : [],
+    minutes: FALLBACK_MINUTES,
+  });
+  const [toHospital, setToHospital] = useState({
+    points: patient && hospitalPos ? [patient, hospitalPos] : [],
+    minutes: FALLBACK_MINUTES,
+  });
+
+  const sLat = unit?.lat;
+  const sLng = unit?.lng;
+  const pLat = spot?.lat;
+  const pLng = spot?.lng;
+  const hLat = hospital?.lat;
+  const hLng = hospital?.lng;
+
+  // Route 1: ambulance station -> patient
   useEffect(() => {
+    if (sLat === undefined || pLat === undefined) return;
     let cancelled = false;
-    fetchRoute(routePoints[0], patientLocation)
-      .then((result) => {
-        if (!cancelled) setRoute(result);
-      })
+    fetchRoute([sLat, sLng], [pLat, pLng])
+      .then((r) => !cancelled && setToPatient(r))
       .catch(() => {});
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [sLat, sLng, pLat, pLng]);
 
-  // The ambulance only moves after the driver accepts
+  // Route 2: patient -> hospital
+  useEffect(() => {
+    if (pLat === undefined || hLat === undefined) return;
+    let cancelled = false;
+    fetchRoute([pLat, pLng], [hLat, hLng])
+      .then((r) => !cancelled && setToHospital(r))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [pLat, pLng, hLat, hLng]);
+
+  // The ambulance moves along route 1 after the driver accepts
   useEffect(() => {
     if (step !== 'map' || status !== 'accepted') return;
-    const timer = setInterval(() => {
-      setIndex((i) => (i < STEPS ? i + 1 : i));
-    }, 2000);
+    const timer = setInterval(() => setPickupIdx((i) => (i < STEPS ? i + 1 : i)), 2000);
     return () => clearInterval(timer);
   }, [step, status]);
 
-  // No booking (cancelled or finished): go back home
-  if (!booking) return <Navigate to="/" replace />;
+  // ...and along route 2 after the patient is picked up
+  useEffect(() => {
+    if (step !== 'map' || status !== 'picked') return;
+    const timer = setInterval(() => setTripIdx((i) => (i < STEPS ? i + 1 : i)), 2000);
+    return () => clearInterval(timer);
+  }, [step, status]);
 
-  const shownIndex = ARRIVED.includes(status) ? STEPS : index;
-  const progress = shownIndex / STEPS;
+  // No booking (cancelled, finished or old data): go back home
+  if (!booking || !patient || !start) return <Navigate to="/" replace />;
+
+  // Which route and progress to show for the current status
+  const onTrip = status === 'picked' || status === 'hospital';
+  const route = onTrip ? toHospital : toPatient;
+  const progress = onTrip
+    ? (status === 'hospital' ? STEPS : tripIdx) / STEPS
+    : (status === 'reached' ? STEPS : pickupIdx) / STEPS;
   const minutesLeft = Math.max(1, Math.ceil(route.minutes * (1 - progress)));
 
   const etaText = {
     requested: 'Searching',
     accepted: `${minutesLeft} min away`,
     reached: 'Now',
-    picked: 'En route',
+    picked: `${minutesLeft} min to hospital`,
     hospital: 'Done',
   }[status];
 
@@ -119,7 +164,12 @@ export default function Tracking() {
   // ---------- Stage 2: live map ----------
   return (
     <div className="track">
-      <TrackingMap path={route.points} progress={progress} />
+      <TrackingMap
+        path={route.points}
+        progress={progress}
+        patient={patient}
+        hospital={hospital && { name: hospital.name, position: hospitalPos }}
+      />
 
       <button className="track__back" onClick={() => setStep('confirmed')}>
         <i className="bi bi-chevron-left" />
@@ -148,10 +198,11 @@ export default function Tracking() {
         )}
 
         <div className="track__driver">
-          <div className="track__avatar">{ambulance.driver.charAt(0)}</div>
+          <div className="track__avatar">{unit.driver.charAt(0)}</div>
           <div>
-            <h4>{ambulance.driver}</h4>
-            <p>Ambulance {ambulance.number}</p>
+            <h4>{unit.driver}</h4>
+            <p>Ambulance {unit.number}</p>
+            <p>From {unit.station}</p>
           </div>
         </div>
 

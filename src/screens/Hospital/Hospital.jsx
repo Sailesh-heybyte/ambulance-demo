@@ -6,8 +6,7 @@ import { getBeds, saveBeds } from '../../utils/beds';
 import { user } from '../../mock/user';
 import './Hospital.scss';
 import { formatAbha } from '../../utils/profile';
-const MY_ID = 'care'; // this portal belongs to Care Hospital
-
+const MY_ID = 'sri-ganga'; // this portal belongs to Sri Ganga Hospital
 const STATUS_TEXT = {
   accepted: 'Ambulance dispatched',
   reached: 'Ambulance has reached the patient',
@@ -67,7 +66,7 @@ export default function Hospital() {
 
               <dl className="incoming__details">
                 <div><dt>Patient</dt><dd>{incoming.forWhom === 'me' ? user.name : 'Someone else (caller booked)'}</dd></div>
-                <div><dt>Pick-up</dt><dd>{user.address}</dd></div>
+               <div><dt>Pick-up</dt><dd>{incoming.pickup?.address}</dd></div>
                 <div><dt>Bed needed</dt><dd>{needed}</dd></div>
                               <div><dt>ABHA ID</dt><dd>{incoming.abha ? formatAbha(incoming.abha) : 'Not shared'}</dd></div>
               </dl>

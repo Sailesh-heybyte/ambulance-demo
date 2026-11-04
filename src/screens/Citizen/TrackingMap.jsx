@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { patientLocation } from '../../mock/ambulance';
 
 const makeIcon = (cls, icon) =>
   L.divIcon({
@@ -12,7 +11,7 @@ const makeIcon = (cls, icon) =>
   });
 
 // path = list of [lat, lng] points, progress = 0 (start) to 1 (arrived)
-export default function TrackingMap({ path, progress }) {
+export default function TrackingMap({ path, progress, hospital, patient }) {
   const mapEl = useRef(null);
   const mapRef = useRef(null);
   const lineRef = useRef(null);
@@ -29,7 +28,7 @@ export default function TrackingMap({ path, progress }) {
 
     lineRef.current = L.polyline(path, { color: '#e8474c', weight: 5 }).addTo(map);
 
-    L.marker(patientLocation, {
+    L.marker(patient, {
       icon: makeIcon('map-pin--patient', 'bi-person-fill'),
     })
       .addTo(map)

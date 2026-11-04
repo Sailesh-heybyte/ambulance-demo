@@ -3,8 +3,7 @@ import { useBooking } from '../../context/BookingContext';
 import useOnline from '../../hooks/useOnline';
 import useGpsPublisher from '../../hooks/useGpsPublisher';
 import { emergencyTypes } from '../../mock/emergencies';
-import { ambulance, patientLocation, patientInfo } from '../../mock/ambulance';
-import { user } from '../../mock/user';
+import { hospitals } from '../../mock/hospitals';
 import './Crew.scss';
 
 const QUEUE_KEY = 'ambulance_crew_queue';
@@ -113,8 +112,13 @@ export default function Crew() {
     return () => clearInterval(id);
   }, [onDuty, status]);
 
-  const openNavigation = () => {
-    const [lat, lng] = patientLocation;
+   const openNavigation = () => {
+    // Before pickup: go to the patient. After pickup: go to the hospital.
+    const hospital = hospitals.find((h) => h.id === booking?.hospitalId);
+    const [lat, lng] =
+      status === 'picked' && hospital
+        ? [hospital.lat, hospital.lng]
+        : [booking.pickup.lat, booking.pickup.lng];
     window.open(
       `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
       '_blank'
@@ -133,7 +137,7 @@ export default function Crew() {
       <div className="crew crew--center">
         <div className="crew__logo"><i className="bi bi-truck-front-fill" /></div>
         <h2>Ambulance Crew</h2>
-        <p>{ambulance.driver} · {ambulance.number}</p>
+                <p>Ready to receive emergency calls</p>
         <button className="crew__big" onClick={goOnDuty}>Go on duty</button>
       </div>
     );
@@ -160,8 +164,8 @@ export default function Crew() {
         <h1>New emergency!</h1>
         <div className="alert__card">
           <h2>{typeLabel}</h2>
-          <p><i className="bi bi-geo-alt-fill" /> {user.address}</p>
-          <p><i className="bi bi-signpost-fill" /> {patientInfo.distance}</p>
+          <p><i className="bi bi-geo-alt-fill" /> {booking.pickup.address}</p>
+          <p><i className="bi bi-signpost-fill" /> {booking.distanceText}</p>
           <p>For: {booking.forWhom === 'me' ? 'The caller' : 'Someone else'}</p>
         </div>
         <div className="alert__buttons">
@@ -204,8 +208,8 @@ export default function Crew() {
 
       <div className="crew__card">
         <span className="crew__tag">{typeLabel}</span>
-        <p><i className="bi bi-geo-alt-fill" /> {user.address}</p>
-        <p><i className="bi bi-pin-map-fill" /> Landmark: {patientInfo.landmark}</p>
+        <p><i className="bi bi-geo-alt-fill" /> {booking.pickup.address}</p>
+        <p><i className="bi bi-pin-map-fill" /> Landmark:{booking.pickup.name}</p>
         <p><i className="bi bi-hospital-fill" /> Hospital: {booking.hospital}</p>
       </div>
 

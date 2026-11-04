@@ -1,24 +1,17 @@
-export const ambulance = {
-  number: 'TS 09 UB 1234',
-  driver: 'Ramesh Kumar',
-  hospital: 'Care Hospital, Banjara Hills',
-};
-
-// [latitude, longitude]
-export const patientLocation = [17.4126, 78.4482];
-
-// The ambulance moves through these points, from far away to the patient
-export const routePoints = [
-  [17.43, 78.465],
-  [17.427, 78.462],
-  [17.424, 78.459],
-  [17.421, 78.456],
-  [17.418, 78.453],
-  [17.416, 78.451],
-  [17.414, 78.4495],
-  [17.4126, 78.4482],
+// Places where a patient can be picked up (real coordinates, Rajahmundry)
+export const pickupSpots = [
+  { id: 'railway', name: 'Rajahmundry Railway Station', address: 'Railway Station, Alcot Gardens, Rajahmundry', lat: 16.9847178, lng: 81.7843157 },
+  { id: 'bus-stand', name: 'Main Bus Stand', address: 'Main Bus Stand, Gandhipuram, Rajahmundry', lat: 17.0009872, lng: 81.7894583 },
+  { id: 'kambala', name: 'Kambala Cheruvu', address: 'Kambala Cheruvu, Rajahmundry', lat: 17.0138689, lng: 81.7780186 },
+  { id: 'aryapuram', name: 'Aryapuram', address: 'Aryapuram, Rajahmundry', lat: 17.0151123, lng: 81.7725499 },
+  { id: 'morampudi', name: 'Morampudi Park', address: 'Morampudi Park, Morampudi, Rajahmundry', lat: 16.9929878, lng: 81.8099371 },
+  { id: 'lalacheruvu', name: 'Lalacheruvu', address: 'Lalacheruvu, Rajahmundry', lat: 17.0320097, lng: 81.8101386 },
 ];
-export const patientInfo = {
-  landmark: 'Opposite City Centre Mall, near the bus stop',
-  distance: '2.4 km away',
-};
+
+// Ambulance stations. The locations are real; drivers and vehicle numbers are demo.
+export const ambulanceUnits = [
+  { id: 'raghavendra', station: 'Raghavendra Ambulance Service, Danavai Peta', driver: 'Ramesh Kumar', number: 'AP 05 UB 1234', lat: 17.0069172, lng: 81.7830503 },
+  { id: 'srihari', station: 'Sri Hari Ambulance Service, Prakasam Nagar', driver: 'Suresh Babu', number: 'AP 05 TV 4821', lat: 17.0086363, lng: 81.7878032 },
+  { id: 'swatantra', station: 'Swatantra Hospital, Kambala Cheruvu', driver: 'Venkat Rao', number: 'AP 05 CD 7310', lat: 17.01437, lng: 81.7775108 },
+  { id: 'ark', station: 'ARK Hospital, Lalacheruvu', driver: 'Prasad Reddy', number: 'AP 05 EF 2209', lat: 17.0282721, lng: 81.8028613 },
+];

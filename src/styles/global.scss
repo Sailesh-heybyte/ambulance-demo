@@ -17,15 +17,24 @@ button {
   cursor: pointer;
   border: none;
 }
+:root {
+  --nav-h: 72px;
+}
+
+html, body {
+  overflow-x: hidden;
+}
+
 .app-shell {
   width: 100%;
   max-width: 430px;
-  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0 auto;
   background: $white;
   position: relative;
-  padding-bottom: 90px; // space for the bottom nav
+  padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom));
 }
+
 .app-shell--full {
   padding-bottom: 0;
 }
