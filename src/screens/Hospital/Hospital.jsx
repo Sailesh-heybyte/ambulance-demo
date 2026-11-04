@@ -3,7 +3,7 @@ import { useBooking } from '../../context/BookingContext';
 import { emergencyTypes } from '../../mock/emergencies';
 import { hospitals, facilityLabels, neededFacility, prepNotes } from '../../mock/hospitals';
 import { getBeds, saveBeds } from '../../utils/beds';
-import { user } from '../../mock/user';
+
 import './Hospital.scss';
 import TripProgress from '../../components/TripProgress';
 import { useStaff } from '../../context/StaffAuthContext';
@@ -69,7 +69,7 @@ export default function Hospital() {
               </div>
               <TripProgress status={incoming.status} />
               <dl className="incoming__details">
-                <div><dt>Patient</dt><dd>{incoming.forWhom === 'me' ? user.name : 'Someone else (caller booked)'}</dd></div>
+                <div><dt>Trip ID</dt><dd>{incoming.tripId}</dd></div>
                <div><dt>Pick-up</dt><dd>{incoming.pickup?.address}</dd></div>
                                <div><dt>Condition</dt><dd>{condition ? condition.label : 'Not set yet'}</dd></div>
                <div><dt>Bed needed</dt><dd>{needed}</dd></div>
