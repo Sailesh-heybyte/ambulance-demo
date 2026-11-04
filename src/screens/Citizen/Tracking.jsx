@@ -25,7 +25,7 @@ export default function Tracking() {
   const status = booking?.status;
   const driverAge = useDriverLocationAge();
 
-  const unit = booking?.ambulance;
+   const unit = booking?.status === 'requested' ? null : booking?.ambulance;
   const spot = booking?.pickup;
   const hospital = hospitals.find((h) => h.id === booking?.hospitalId);
 

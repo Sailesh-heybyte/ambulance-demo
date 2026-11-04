@@ -1,8 +1,8 @@
 @use '../../styles/colors' as *;
 @use '../../styles/variables' as *;
-
 .aid {
-  padding: 24px 20px;
+  position: relative;
+  padding: $page-top 20px 24px;
 
   &__title { margin: 0 0 4px; font-size: 24px; }
   &__sub { margin: 0 0 20px; color: $muted; font-size: 14px; }
@@ -37,7 +37,11 @@
 
   &__item-label { flex: 1; font-size: 15px; font-weight: 600; }
 
-  &__back {
+   &__back {
+    position: absolute;
+    top: $page-top;
+    left: 20px;
+    z-index: 1;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -47,7 +51,7 @@
   }
 
   &__hero {
-    margin: 12px 0 20px;
+     margin: 0 0 20px;
     text-align: center;
 
     h1 { margin: 12px 0 6px; font-size: 24px; }

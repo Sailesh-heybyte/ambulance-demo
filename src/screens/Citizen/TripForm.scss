@@ -2,7 +2,7 @@
 @use '../../styles/variables' as *;
 
 .tf {
-  padding: 16px 20px 24px;
+  padding: $page-top 20px 24px;
 
   &__back {
     flex-shrink: 0;

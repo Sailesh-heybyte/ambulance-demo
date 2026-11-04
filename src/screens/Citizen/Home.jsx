@@ -15,7 +15,9 @@ export default function Home() {
   const user = { ...mockUser, name: account?.name || mockUser.name };
  
   const navigate = useNavigate();
-   
+     const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
    const { createBooking } = useBooking();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [pickup, setPickup] = useState(getPickup);
@@ -28,12 +30,13 @@ export default function Home() {
 
   return (
     <div className="home">
-      <header className="home__header">
-        <div>
-          <p className="home__welcome">Welcome back,</p>
+          <header className="home__header">
+        <div className="home__hello">
+          <p className="home__welcome">{greeting},</p>
           <h2 className="home__name">{user.name}</h2>
+
         </div>
-                    <button
+        <button
           className="home__avatar"
           onClick={() => navigate('/profile')}
           aria-label="Open profile"
