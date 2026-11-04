@@ -5,8 +5,9 @@ import { hospitals, facilityLabels, neededFacility, prepNotes } from '../../mock
 import { getBeds, saveBeds } from '../../utils/beds';
 import { user } from '../../mock/user';
 import './Hospital.scss';
+import { useStaff } from '../../context/StaffAuthContext';
 import { formatAbha } from '../../utils/profile';
-const MY_ID = 'sri-ganga'; // this portal belongs to Sri Ganga Hospital
+
 const STATUS_TEXT = {
   accepted: 'Ambulance dispatched',
   reached: 'Ambulance has reached the patient',
@@ -17,7 +18,8 @@ const STATUS_TEXT = {
 export default function Hospital() {
   const { booking } = useBooking();
   const [allBeds, setAllBeds] = useState(getBeds);
-
+  const { hospital: session, logout } = useStaff();
+  const MY_ID = session.hospitalId;
   const me = hospitals.find((h) => h.id === MY_ID);
   const beds = allBeds[MY_ID];
 
@@ -43,6 +45,9 @@ export default function Hospital() {
       <header className="portal__header">
         <div className="portal__logo"><i className="bi bi-hospital-fill" /></div>
         <div>
+                  <button className="portal__logout" onClick={() => logout('hospital')}>
+          <i className="bi bi-box-arrow-right" /> Log out
+        </button>
           <h1>{me.name}</h1>
           <p>Emergency department portal</p>
         </div>

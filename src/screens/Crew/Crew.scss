@@ -35,6 +35,13 @@
 
   &__title { margin: 0 0 16px; }
 
+  &__link {
+    margin-top: 18px;
+    background: transparent;
+    color: $muted;
+    font-size: 14px;
+    font-weight: 600;
+  }
   &__card {
     padding: 16px;
     border-radius: $radius-md;

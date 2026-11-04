@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { StaffProvider, useStaff } from './context/StaffAuthContext';
 import { BookingProvider } from './context/BookingContext';
 import Splash from './screens/Splash/Splash';
 import SignIn from './screens/Auth/SignIn';
+import StaffLogin from './screens/Auth/StaffLogin';
 import Home from './screens/Citizen/Home';
 import Tracking from './screens/Citizen/Tracking';
 import FirstAid from './screens/Citizen/FirstAid';
@@ -16,12 +18,24 @@ import BottomNav from './components/BottomNav';
 function Layout() {
   const { pathname } = useLocation();
   const { isAuthenticated } = useAuth();
+  const { crew, hospital } = useStaff();
 
-  // Crew and hospital pages do not need the citizen sign-in
-  if (pathname === '/hospital') return <Hospital />;
+  // Hospital portal: wide desktop page, needs a hospital login
+  if (pathname === '/hospital') {
+    return hospital ? <Hospital /> : <StaffLogin role="hospital" />;
+  }
 
-  const isCrew = pathname === '/crew';
-  if (!isAuthenticated && !isCrew) {
+  // Crew app: phone-size, needs a crew login
+  if (pathname === '/crew') {
+    return (
+      <div className="app-shell app-shell--full">
+        {crew ? <Crew /> : <StaffLogin role="crew" />}
+      </div>
+    );
+  }
+
+  // Everything else is the citizen app, which needs the citizen sign-in
+  if (!isAuthenticated) {
     return (
       <div className="app-shell app-shell--full">
         <SignIn />
@@ -29,7 +43,7 @@ function Layout() {
     );
   }
 
-  const fullScreen = pathname === '/tracking' || isCrew;
+  const fullScreen = pathname === '/tracking';
 
   return (
     <div className={`app-shell ${fullScreen ? 'app-shell--full' : ''}`}>
@@ -39,7 +53,6 @@ function Layout() {
         <Route path="/first-aid" element={<FirstAid />} />
         <Route path="/trips" element={<Trips />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/crew" element={<Crew />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {!fullScreen && <BottomNav />}
@@ -60,9 +73,11 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <BookingProvider>
-          <Layout />
-        </BookingProvider>
+        <StaffProvider>
+          <BookingProvider>
+            <Layout />
+          </BookingProvider>
+        </StaffProvider>
       </AuthProvider>
     </BrowserRouter>
   );

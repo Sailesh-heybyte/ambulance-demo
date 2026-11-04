@@ -5,7 +5,7 @@ import useGpsPublisher from '../../hooks/useGpsPublisher';
 import { emergencyTypes } from '../../mock/emergencies';
 import { hospitals } from '../../mock/hospitals';
 import './Crew.scss';
-
+import { useStaff } from '../../context/StaffAuthContext';
 const QUEUE_KEY = 'ambulance_crew_queue';
 
 // For each status, which button the driver sees and what it changes to
@@ -47,7 +47,11 @@ function StatusBar({ network, gps }) {
 }
 
 export default function Crew() {
-  const { booking, updateStatus, clearBooking } = useBooking();
+   const { booking: anyBooking, updateStatus, clearBooking } = useBooking();
+  const { crew, logout } = useStaff();
+
+  // Only show a job if it was sent to THIS crew's ambulance
+  const booking = anyBooking?.ambulance?.id === crew.unitId ? anyBooking : null;
   const network = useOnline();
   const [onDuty, setOnDuty] = useState(false);
   const [queued, setQueued] = useState(() => localStorage.getItem(QUEUE_KEY));
@@ -137,8 +141,9 @@ export default function Crew() {
       <div className="crew crew--center">
         <div className="crew__logo"><i className="bi bi-truck-front-fill" /></div>
         <h2>Ambulance Crew</h2>
-                <p>Ready to receive emergency calls</p>
+                   <p>{crew.name} · {crew.number}</p>
         <button className="crew__big" onClick={goOnDuty}>Go on duty</button>
+        <button className="crew__link" onClick={() => logout('crew')}>Log out</button>
       </div>
     );
   }
@@ -151,6 +156,7 @@ export default function Crew() {
         <div className="crew__pulse"><i className="bi bi-broadcast" /></div>
         <h2>You are on duty</h2>
         <p>Waiting for emergency calls…</p>
+             <button className="crew__link" onClick={() => logout('crew')}>Log out</button>
       </div>
     );
   }

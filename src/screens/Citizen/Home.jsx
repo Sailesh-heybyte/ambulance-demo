@@ -4,6 +4,8 @@ import { user as mockUser } from '../../mock/user';
 import { useAuth } from '../../context/AuthContext';
 import EmergencySheet from './EmergencySheet';
 import './Home.scss';
+import { getProfile } from '../../utils/profile';
+import SosButton from '../../components/SosButton';
 import Sheet from '../../components/Sheet';
 import { pickupSpots } from '../../mock/ambulance';
 import { getPickup, savePickup } from '../../utils/dispatch';
@@ -11,7 +13,13 @@ import { useBooking } from '../../context/BookingContext';
 export default function Home() {
     const { user: account } = useAuth();
   const user = { ...mockUser, name: account?.name || mockUser.name };
+ 
   const navigate = useNavigate();
+    // How many profile items are still empty (ABHA, Aarogyasri, emergency contact)
+  const profile = getProfile();
+  const missing = [profile.abha, profile.aarogyasri, profile.contacts.length > 0].filter(
+    (done) => !done
+  ).length;
    const { createBooking } = useBooking();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [pickup, setPickup] = useState(getPickup);
@@ -29,22 +37,24 @@ export default function Home() {
           <p className="home__welcome">Welcome back,</p>
           <h2 className="home__name">{user.name}</h2>
         </div>
-        <div className="home__avatar">
+               <button
+          className="home__avatar"
+          onClick={() => navigate('/profile')}
+          aria-label="Open profile"
+        >
           {user.name.charAt(0)}
-          <span className="home__badge">2</span>
-        </div>
+          {missing > 0 && <span className="home__badge">{missing}</span>}
+        </button>
       </header>
 
       <section className="home__main">
         <h1>Are you in emergency?</h1>
-        <p>Press the button below, help will reach you soon.</p>
+                <p>Press and hold the button for 2 seconds, help will reach you soon.</p>
 
         <div className="sos">
           <span className="sos__ring sos__ring--outer" />
           <span className="sos__ring sos__ring--inner" />
-          <button className="sos__button" onClick={() => setSheetOpen(true)}>
-            SOS
-          </button>
+                    <SosButton onComplete={() => setSheetOpen(true)} />
         </div>
       </section>
 

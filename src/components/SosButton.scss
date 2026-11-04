@@ -1,0 +1,84 @@
+@use '../styles/colors' as *;
+@use '../styles/variables' as *;
+
+$circ: 540.35; // ring length: 2 x 3.1416 x 86
+
+.sos-btn {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  // Progress ring around the button
+  &__ring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg); // start filling from the top
+    pointer-events: none;
+
+    circle {
+      fill: none;
+      stroke-width: 6;
+    }
+  }
+
+  &__track {
+    stroke: rgba($primary, 0.15);
+  }
+
+  &__bar {
+    stroke: $primary;
+    stroke-linecap: round;
+    stroke-dasharray: $circ;
+    stroke-dashoffset: $circ; // empty
+    transition-property: stroke-dashoffset;
+    transition-timing-function: linear;
+  }
+
+  &__button {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: $primary;
+    color: $white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    box-shadow: $shadow-red;
+    transition: transform 0.2s;
+
+    // Stops text selection and the long-press menu on phones
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+
+    span {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    small {
+      font-size: 11px;
+      font-weight: 600;
+      opacity: 0.85;
+    }
+  }
+}
+
+// While holding: the ring fills and the button shrinks slightly
+.sos-btn--holding .sos-btn__bar {
+  stroke-dashoffset: 0;
+}
+
+.sos-btn--holding .sos-btn__button {
+  transform: scale(0.94);
+}
