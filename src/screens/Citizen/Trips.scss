@@ -128,4 +128,8 @@
 
     .trip__status { background: #eee; color: $muted; }
   }
+    &--completed .trip__status {
+    background: #e7f0ff;
+    color: #2563eb;
+  }
 }

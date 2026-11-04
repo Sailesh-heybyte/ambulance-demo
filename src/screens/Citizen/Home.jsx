@@ -4,7 +4,7 @@ import { user as mockUser } from '../../mock/user';
 import { useAuth } from '../../context/AuthContext';
 import EmergencySheet from './EmergencySheet';
 import './Home.scss';
-import { getProfile } from '../../utils/profile';
+
 import SosButton from '../../components/SosButton';
 import Sheet from '../../components/Sheet';
 import { pickupSpots } from '../../mock/ambulance';
@@ -15,11 +15,7 @@ export default function Home() {
   const user = { ...mockUser, name: account?.name || mockUser.name };
  
   const navigate = useNavigate();
-    // How many profile items are still empty (ABHA, Aarogyasri, emergency contact)
-  const profile = getProfile();
-  const missing = [profile.abha, profile.aarogyasri, profile.contacts.length > 0].filter(
-    (done) => !done
-  ).length;
+   
    const { createBooking } = useBooking();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [pickup, setPickup] = useState(getPickup);
@@ -37,13 +33,12 @@ export default function Home() {
           <p className="home__welcome">Welcome back,</p>
           <h2 className="home__name">{user.name}</h2>
         </div>
-               <button
+                    <button
           className="home__avatar"
           onClick={() => navigate('/profile')}
           aria-label="Open profile"
         >
           {user.name.charAt(0)}
-          {missing > 0 && <span className="home__badge">{missing}</span>}
         </button>
       </header>
 

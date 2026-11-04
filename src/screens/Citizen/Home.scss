@@ -36,20 +36,6 @@
     font-size: 18px;
   }
 
-  &__badge {
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: $primary;
-    color: $white;
-    font-size: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
 
   &__main {
     text-align: center;

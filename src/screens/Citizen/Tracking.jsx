@@ -21,7 +21,7 @@ const TITLES = {
 
 export default function Tracking() {
   const navigate = useNavigate();
-  const { booking, clearBooking } = useBooking();
+  const { booking, clearBooking , completeBooking } = useBooking();
   const status = booking?.status;
   const driverAge = useDriverLocationAge();
 
@@ -132,7 +132,11 @@ export default function Tracking() {
     clearBooking();
     navigate('/');
   };
-
+  // Trip finished: save it to "Your trips" first
+  const handleDone = () => {
+    completeBooking();
+    navigate('/');
+  };
    // No driver yet? Stay on this screen and show no driver details.
   if (step === 'confirmed' || !unit) {
     return (
@@ -236,9 +240,12 @@ export default function Tracking() {
           <i className="bi bi-heart-pulse-fill" /> First aid tips while you wait
         </button>
 
-        <button className="confirmed__link track__cancel" onClick={handleCancel}>
-          {status === 'hospital' ? 'Done' : 'Cancel request'}
-        </button>
+       <button
+  className="confirmed__link track__cancel"
+  onClick={status === 'hospital' ? handleDone : handleCancel}
+>
+  {status === 'hospital' ? 'Done' : 'Cancel request'}
+</button>
       </div>
     </div>
   );

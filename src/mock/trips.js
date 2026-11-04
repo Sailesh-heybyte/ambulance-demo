@@ -20,6 +20,7 @@ export const scheduledPurposes = [
   'Dialysis',
   'Discharge from hospital',
   'Inter-hospital transfer',
+   'Others',
 ];
 
 export const vehicleNeeds = ['Stretcher', 'Wheelchair', 'Walks without help'];

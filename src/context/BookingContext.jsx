@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { recommendHospital } from '../utils/beds';
 import { getPickup } from '../utils/dispatch';
 import { getProfile } from '../utils/profile';
+import { addCompletedTrip } from '../utils/trips';
 const KEY = 'ambulance_booking';
 const BookingContext = createContext(null);
 
@@ -82,10 +83,15 @@ export function BookingProvider({ children }) {
   const updateStatus = (status) => save({ ...booking, status });
    const updateBooking = (patch) => save({ ...booking, ...patch });
   const clearBooking = () => save(null);
-
+  // Trip finished: keep it in "Your trips", then clear the live booking
+  const completeBooking = () => {
+    const latest = read();
+    if (latest && latest.status === 'hospital') addCompletedTrip(latest);
+    save(null);
+  };
   return (
     <BookingContext.Provider
-      value={{ booking, createBooking,acceptBooking, updateStatus,updateBooking, clearBooking }}
+      value={{ booking, createBooking,acceptBooking, updateStatus,updateBooking, completeBooking,clearBooking }}
     >
       {children}
     </BookingContext.Provider>

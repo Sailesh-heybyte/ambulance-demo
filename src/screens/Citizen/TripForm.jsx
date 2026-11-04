@@ -13,7 +13,8 @@ export default function TripForm({ kind, onBack, onSaved }) {
   const isMortuary = kind === 'mortuary';
 
   const [f, setF] = useState({
-    purpose: scheduledPurposes[0],
+        purpose: scheduledPurposes[0],
+    other: '',
     need: vehicleNeeds[0],
     patient: '',
     phone: '',
@@ -31,7 +32,9 @@ export default function TripForm({ kind, onBack, onSaved }) {
 
   const submit = () => {
     const phone = f.phone.replace(/\D/g, '');
-
+    if (isScheduled && f.purpose === 'Others' && !f.other.trim()) {
+      return setError('Please specify the reason.');
+    }
     if (!f.patient.trim()) return setError('Please enter the name.');
     if (phone.length !== 10) return setError('Enter a 10-digit phone number.');
     if (!f.pickup.trim()) return setError('Please enter the pick-up location.');
@@ -52,7 +55,9 @@ export default function TripForm({ kind, onBack, onSaved }) {
 
     addTrip({
       kind,
-      title: isScheduled ? f.purpose : info.title,
+          title: isScheduled
+        ? (f.purpose === 'Others' ? f.other.trim() : f.purpose)
+        : info.title,
       patient: f.patient.trim(),
       phone,
       pickup: f.pickup.trim(),
@@ -65,12 +70,11 @@ export default function TripForm({ kind, onBack, onSaved }) {
   };
 
   return (
-    <div className="tf">
-      <button className="tf__back" onClick={onBack}>
-        <i className="bi bi-chevron-left" />
-      </button>
-
+       <div className="tf">
       <div className="tf__head">
+        <button className="tf__back" onClick={onBack}>
+          <i className="bi bi-chevron-left" />
+        </button>
         <div className="tf__icon"><i className={`bi ${info.icon}`} /></div>
         <div>
           <h1>{info.title}</h1>
@@ -84,6 +88,13 @@ export default function TripForm({ kind, onBack, onSaved }) {
           <select value={f.purpose} onChange={set('purpose')}>
             {scheduledPurposes.map((p) => <option key={p}>{p}</option>)}
           </select>
+                    {f.purpose === 'Others' && (
+            <input
+              value={f.other}
+              onChange={set('other')}
+              placeholder="Please specify the reason"
+            />
+          )}
         </>
       )}
 

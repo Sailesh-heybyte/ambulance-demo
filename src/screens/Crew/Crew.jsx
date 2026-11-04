@@ -50,7 +50,7 @@ function StatusBar({ network, gps }) {
 }
 
 export default function Crew() {
-   const { booking: anyBooking, acceptBooking,updateStatus,updateBooking, clearBooking } = useBooking();
+   const { booking: anyBooking, acceptBooking,updateStatus,updateBooking, completeBooking } = useBooking();
   const { crew, logout } = useStaff();
 
    const [declined, setDeclined] = useState(null); // the request this driver said no to
@@ -222,7 +222,7 @@ export default function Crew() {
         <div className="crew__done"><i className="bi bi-check-lg" /></div>
         <h2>Trip complete</h2>
         <p>Patient handed over at {booking.hospital}</p>
-        <button className="crew__big" disabled={!network || Boolean(queued)} onClick={clearBooking}>
+       <button className="crew__big" disabled={!network || Boolean(queued)} onClick={completeBooking}>
           {network && !queued ? 'Finish' : 'Waiting to sync…'}
         </button>
       </div>

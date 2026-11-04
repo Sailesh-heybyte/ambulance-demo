@@ -4,7 +4,11 @@ import TripForm from './TripForm';
 import { tripKinds } from '../../mock/trips';
 import { getTrips, cancelTrip } from '../../utils/trips';
 import './Trips.scss';
-
+const STATUS_TEXT = {
+  booked: 'Booked',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+};
 export default function Trips() {
   const navigate = useNavigate();
   const [kind, setKind] = useState(null); // which form is open
@@ -56,15 +60,17 @@ export default function Trips() {
       {trips.length === 0 && <p className="trips__empty">No trips booked yet.</p>}
 
       {trips.map((t) => (
-        <div className={`trip ${t.status === 'cancelled' ? 'trip--cancelled' : ''}`} key={t.id}>
+     <div className={`trip trip--${t.status}`} key={t.id}>
           <div className="trip__top">
             <h4>{t.title}</h4>
             <span className="trip__status">
-              {t.status === 'cancelled' ? 'Cancelled' : 'Booked'}
+           {STATUS_TEXT[t.status]}
             </span>
           </div>
           <p><i className="bi bi-clock-fill" /> {t.whenText}</p>
-          <p><i className="bi bi-person-fill" /> {t.patient}</p>
+         {t.tripId && <p><i className="bi bi-hash" /> {t.tripId}</p>}
+{t.patient && <p><i className="bi bi-person-fill" /> {t.patient}</p>}
+{t.driver && <p><i className="bi bi-person-badge-fill" /> {t.driver}</p>}
           <p><i className="bi bi-geo-alt-fill" /> {t.pickup}</p>
           <p><i className="bi bi-flag-fill" /> {t.destination}</p>
           {t.need && <p><i className="bi bi-universal-access" /> {t.need}</p>}
