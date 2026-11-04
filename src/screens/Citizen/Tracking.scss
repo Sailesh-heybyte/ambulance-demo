@@ -1,0 +1,219 @@
+@use '../../styles/colors' as *;
+@use '../../styles/variables' as *;
+
+// ---------- Stage 1: red screen ----------
+.confirmed {
+  min-height: 100vh;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, $primary 0%, $primary-dark 100%);
+  color: $white;
+
+  &__back {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    color: $white;
+    font-size: 16px;
+  }
+
+  &__art {
+    margin: 40px auto 0;
+    width: 260px;
+    height: 190px;
+    border-radius: 58% 42% 52% 48% / 52% 48% 52% 48%; // soft blob shape
+    background: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__text {
+    margin-top: 40px;
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 24px;
+      line-height: 1.3;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.5;
+      opacity: 0.85;
+    }
+  }
+
+  &__actions {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: center;
+  }
+
+  &__primary {
+    width: 100%;
+    padding: 16px;
+    border-radius: $radius-md;
+    background: $white;
+    color: $primary;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  &__link {
+    background: transparent;
+    color: inherit;
+    font-size: 14px;
+    font-weight: 600;
+  }
+}
+
+// ---------- Stage 2: map + driver card ----------
+.track {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+
+  &__back {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 1001;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: $white;
+    color: $text;
+    font-size: 16px;
+    box-shadow: $shadow-card;
+  }
+
+  &__card {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1001;
+    padding: 20px;
+    border-radius: $radius-lg $radius-lg 0 0;
+    background: $white;
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  &__status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+  }
+
+  &__eta {
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: $primary-light;
+    color: $primary;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  &__notified {
+    margin: 10px 0 0;
+    font-size: 12px;
+    color: $muted;
+
+    i { color: $primary; }
+  }
+  &__driver {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+
+    h4 {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    p {
+      margin: 2px 0 0;
+      font-size: 13px;
+      color: $muted;
+    }
+  }
+
+  &__avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: $primary-light;
+    color: $primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  &__hospital {
+    margin: 14px 0 0;
+    padding: 10px 12px;
+    border-radius: $radius-sm;
+    background: $background;
+    font-size: 13px;
+
+    i {
+      color: $primary;
+      margin-right: 4px;
+    }
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  &__call,
+  &__msg,
+  &__share {
+    flex: 1;
+    padding: 13px 6px;
+    border-radius: $radius-md;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  &__call { background: $primary; color: $white; }
+  &__msg { background: #eceef2; color: $text; }
+  &__share { background: $primary-light; color: $primary; }
+  &__aid {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: $radius-md;
+    background: $background;
+    color: $text;
+    font-size: 14px;
+    font-weight: 600;
+
+    i { color: $primary; margin-right: 4px; }
+  }
+  &__cancel {
+    display: block;
+    margin: 14px auto 0;
+    color: $muted;
+  }
+}
+
+.tracking-map {
+  position: absolute;
+  inset: 0;
+}

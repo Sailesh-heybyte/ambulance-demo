@@ -1,0 +1,74 @@
+@use '../../styles/colors' as *;
+@use '../../styles/variables' as *;
+
+.types {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 4px;
+    border-radius: $radius-md;
+    background: $background;
+    color: $text;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    border: 2px solid transparent;
+
+    i {
+      font-size: 24px;
+      color: $primary;
+    }
+
+    &--active {
+      background: $primary-light;
+      border-color: $primary;
+    }
+  }
+}
+
+.who {
+  display: flex;
+  gap: 8px;
+  margin: 20px 0;
+  padding: 4px;
+  border-radius: $radius-md;
+  background: $background;
+
+  &__btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: $radius-sm;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 600;
+    color: $muted;
+
+    &--active {
+      background: $white;
+      color: $primary;
+      box-shadow: $shadow-card;
+    }
+  }
+}
+
+.confirm {
+  width: 100%;
+  padding: 16px;
+  border-radius: $radius-md;
+  background: $primary;
+  color: $white;
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: $shadow-red;
+
+  &:disabled {
+    opacity: 0.4;
+    box-shadow: none;
+  }
+}

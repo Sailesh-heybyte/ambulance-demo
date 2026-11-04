@@ -1,0 +1,47 @@
+@use '../styles/colors' as *;
+@use '../styles/variables' as *;
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 12px 16px 16px;
+  background: $white;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    border-radius: $radius-sm;
+    color: $muted;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+
+    i {
+      font-size: 20px;
+    }
+
+    // label is hidden unless the tab is active
+    span {
+      display: none;
+    }
+
+    &.active {
+      background: $primary;
+      color: $white;
+
+      span {
+        display: inline;
+      }
+    }
+  }
+}

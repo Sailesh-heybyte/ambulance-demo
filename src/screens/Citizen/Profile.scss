@@ -1,0 +1,136 @@
+@use '../../styles/colors' as *;
+@use '../../styles/variables' as *;
+
+.profile {
+  padding: 24px 20px;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+
+    h1 { margin: 0; font-size: 22px; }
+    p { margin: 2px 0 0; color: $muted; font-size: 13px; }
+  }
+
+  &__avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: $primary-light;
+    color: $primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 700;
+  }
+}
+
+.card {
+  margin-bottom: 16px;
+  padding: 18px;
+  border-radius: $radius-md;
+  background: $white;
+  box-shadow: $shadow-card;
+
+  h2 {
+    margin: 0 0 14px;
+    font-size: 17px;
+
+    i { color: $primary; margin-right: 6px; }
+  }
+
+  label {
+    display: block;
+    margin: 12px 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: $radius-sm;
+    background: $background;
+    font-family: inherit;
+    font-size: 14px;
+
+    &:focus { outline: none; border-color: $primary; background: $white; }
+  }
+
+  &__note {
+    margin: 12px 0 0;
+    color: $muted;
+    font-size: 12px;
+    line-height: 1.4;
+
+    &--top { margin: -6px 0 12px; }
+  }
+
+  &__empty { margin: 0 0 12px; color: $muted; font-size: 14px; }
+}
+
+.btn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: $radius-md;
+  background: $primary;
+  color: $white;
+  font-size: 15px;
+  font-weight: 700;
+
+  &--light { background: $primary-light; color: $primary; }
+}
+
+.form-error {
+  margin: 10px 0 0;
+  color: $primary-dark;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.contact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+
+  &__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: $primary-light;
+    color: $primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+
+  &__info {
+    flex: 1;
+
+    h4 { margin: 0; font-size: 15px; }
+    p { margin: 2px 0 0; color: $muted; font-size: 13px; }
+  }
+
+  &__remove {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: transparent;
+    color: $muted;
+    font-size: 16px;
+  }
+}
+
+.add {
+  margin-top: 16px;
+
+  input { margin-bottom: 8px; }
+}
