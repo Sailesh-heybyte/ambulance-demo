@@ -18,8 +18,9 @@
 
   &__brand {
     display: flex;
-    align-items: center;
-    gap: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
     padding: 4px 4px 0;
 
     h2 {

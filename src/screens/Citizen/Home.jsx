@@ -7,7 +7,7 @@ import { pickupSpots } from '../../mock/ambulance';
 import { getPickup, savePickup } from '../../utils/dispatch';
 import { useBooking } from '../../context/BookingContext';
 import ProtocolLeaders, { LEADERS } from '../../components/ProtocolLeaders';
-import GovtEmblem from '../../components/GovtEmblem';
+import BrandLogo from '../../components/BrandLogo';
 import { ambulanceUnits } from '../../mock/ambulance';
 import './Home.scss';
 
@@ -69,10 +69,7 @@ export default function Home() {
       {/* --- Top App Bar (108 Ambulance + Language + Menu) --- */}
       <header className="home-screen__navbar home-anim" style={{ '--i': 1 }}>
         <div className="home-screen__brand">
-          <div className="home-screen__cross-badge">
-            <i className="bi bi-plus-lg" />
-          </div>
-          <span className="home-screen__brand-name">108 Ambulance</span>
+          <BrandLogo size={38} layout="pair" sub="Govt. of A.P." />
         </div>
 
         <div className="home-screen__nav-actions">
@@ -223,7 +220,7 @@ export default function Home() {
       <Sheet open={officialOpen} onClose={() => setOfficialOpen(false)} title="Official Government Service">
         <div className="official-card">
           <div className="official-card__head">
-            <GovtEmblem size={64} />
+            <BrandLogo size={52} layout="pair" showText={false} />
             <div>
               <b>Government of Andhra Pradesh</b>
               <span>Department of Health, Medical &amp; Family Welfare</span>

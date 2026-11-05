@@ -1,0 +1,77 @@
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--bl-size) * 0.26);
+  min-width: 0;
+  flex-shrink: 0;
+
+  &__marks {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--bl-size) * 0.18);
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+  }
+
+  &__divider {
+    width: 1.5px;
+    border-radius: 2px;
+    background: linear-gradient(to bottom, rgba(212, 167, 58, 0), #D4A73A 30%, #D4A73A 70%, rgba(212, 167, 58, 0));
+  }
+
+  &__mark {
+    display: block;
+    flex-shrink: 0;
+    border-radius: 50%;
+    box-shadow: 0 6px 16px -8px rgba(220, 38, 38, 0.55);
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.1;
+  }
+
+  &__word {
+    font-size: clamp(15px, calc(var(--bl-size) * 0.44), 40px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #111827;
+    white-space: nowrap;
+    b { color: #DC2626; font-weight: 900; }
+  }
+
+  &__sub {
+    margin-top: 3px;
+    font-size: clamp(9px, calc(var(--bl-size) * 0.2), 13px);
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #B88A1E;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // Splash / sign-in: marks side by side, wordmark centred below
+  &--stacked {
+    flex-direction: column;
+    text-align: center;
+    gap: calc(var(--bl-size) * 0.2);
+
+    .brand-logo__marks { gap: calc(var(--bl-size) * 0.24); }
+    .brand-logo__text { align-items: center; }
+    .brand-logo__word { font-size: clamp(24px, calc(var(--bl-size) * 0.32), 36px); }
+    .brand-logo__sub { margin-top: 6px; font-size: 11px; letter-spacing: 0.16em; }
+  }
+
+  // Compact headers: the 108 mark tucked over the emblem
+  &--pair {
+    .brand-logo__marks { gap: 0; }
+    .brand-logo__mark {
+      margin-left: calc(var(--bl-size) * -0.26);
+      box-shadow: 0 0 0 2px #fff, 0 6px 14px -8px rgba(220, 38, 38, 0.6);
+    }
+  }
+}

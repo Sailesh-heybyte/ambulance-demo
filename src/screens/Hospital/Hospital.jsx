@@ -9,7 +9,7 @@ import TripProgress from '../../components/TripProgress';
 import { useStaff } from '../../context/StaffAuthContext';
 import { formatAbha } from '../../utils/profile';
 import { conditions } from '../../mock/conditions';
-import GovtEmblem from '../../components/GovtEmblem';
+import BrandLogo from '../../components/BrandLogo';
 import { LEADERS } from '../../components/ProtocolLeaders';
 const BED_ICON = {
   icu: 'bi-heart-pulse',
@@ -64,7 +64,7 @@ export default function Hospital() {
       {/* ---------- Official header ---------- */}
       <header className="portal__header">
         <div className="portal__header-in">
-          <GovtEmblem size={46} className="portal__emblem" />
+          <BrandLogo size={44} layout="pair" showText={false} className="portal__emblem" />
           <div className="portal__title">
             <span className="portal__eyebrow"><span className="portal__eyebrow-short">Govt. of A.P. · 108 ER</span><span className="portal__eyebrow-more">Govt. of Andhra Pradesh · 108 Emergency Services</span></span>
             <h1>{me.name}</h1>

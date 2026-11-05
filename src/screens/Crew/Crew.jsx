@@ -10,7 +10,7 @@ import './Crew.scss';
 import { ambulanceUnits } from '../../mock/ambulance';
 import { distanceKm } from '../../utils/geo';
 import { useStaff } from '../../context/StaffAuthContext';
-import GovtEmblem from '../../components/GovtEmblem';
+import BrandLogo from '../../components/BrandLogo';
 import ProtocolLeaders from '../../components/ProtocolLeaders';
 import TripProgress from '../../components/TripProgress';
 const QUEUE_KEY = 'ambulance_crew_queue';
@@ -40,7 +40,7 @@ function gpsText(network, gps) {
 function CrewHeader({ crew, onDuty, onLogout }) {
   return (
     <header className="crew-head">
-      <GovtEmblem size={38} />
+      <BrandLogo size={36} layout="pair" showText={false} />
       <div className="crew-head__text">
         <strong>108 Crew</strong>
         <span>{crew.number}</span>

@@ -3,8 +3,7 @@ import { useStaff } from '../../context/StaffAuthContext';
 import { crewAccounts, hospitalAccounts } from '../../mock/staff';
 import { ambulanceUnits } from '../../mock/ambulance';
 import { hospitals } from '../../mock/hospitals';
-import { APP_NAME } from '../../mock/app';
-import GovtEmblem from '../../components/GovtEmblem';
+import BrandLogo from '../../components/BrandLogo';
 import ProtocolLeaders from '../../components/ProtocolLeaders';
 import './StaffLogin.scss';
 
@@ -87,9 +86,9 @@ export default function StaffLogin({ role }) {
       <aside className="staff__side">
         <ProtocolLeaders variant="ribbon" className="staff__ribbon" />
         <div className="staff__brand">
-          <GovtEmblem size={84} />
+          <BrandLogo size={72} showText={false} />
           <div>
-            <p className="staff__eyebrow">108 Emergency Services</p>
+            <p className="staff__eyebrow">108 Ambulance · Govt. of A.P.</p>
             <h2>{text.portal}</h2>
             <p className="staff__tag">{text.sub}</p>
           </div>

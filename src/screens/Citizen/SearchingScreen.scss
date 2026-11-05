@@ -306,3 +306,10 @@
 @media (prefers-reduced-motion: reduce) {
   .searching *, .searching *::before { animation: none !important; }
 }
+
+// 108 seal in the centre of the radar
+svg.searching__emblem {
+  display: block;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px #FFFFFF, 0 16px 34px -12px rgba(220, 38, 38, 0.5);
+}

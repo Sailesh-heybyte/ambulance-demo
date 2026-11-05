@@ -1,5 +1,5 @@
 import ProtocolLeaders from '../../components/ProtocolLeaders';
-import GovtEmblem from '../../components/GovtEmblem';
+import { AmbulanceMark } from '../../components/BrandLogo';
 import { ambulanceUnits } from '../../mock/ambulance';
 import './SearchingScreen.scss';
 
@@ -48,7 +48,7 @@ export default function SearchingScreen({ booking, found, unit, onCancel }) {
           </span>
         ))}
         <div className="searching__core">
-          <GovtEmblem size="100%" className="searching__emblem" />
+          <AmbulanceMark size={120} variant="seal" className="searching__emblem" />
           <span className="searching__tick">
             <i className="bi bi-check-lg" />
           </span>

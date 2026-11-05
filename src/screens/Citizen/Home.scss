@@ -713,8 +713,8 @@
     background: #FFFBF0;
     border: 1px solid #F1E3B8;
 
-    b { display: block; font-size: 15px; font-weight: 800; color: #111827; }
-    span { display: block; margin-top: 2px; font-size: 12.5px; color: #6B7280; }
+    > div:not(.brand-logo) b { display: block; font-size: 15px; font-weight: 800; color: #111827; }
+    > div:not(.brand-logo) span { display: block; margin-top: 2px; font-size: 12.5px; color: #6B7280; }
   }
 
   &__leaders {
@@ -767,4 +767,15 @@
     }
     i { color: #DC2626; font-size: 16px; }
   }
+}
+
+// Narrow phones (≤374px): keep the logo, menu and language button on one line
+@media (max-width: 374px) {
+  .home-screen__navbar {
+    gap: 6px;
+    .brand-logo__word { font-size: 15.5px; }
+    .brand-logo__sub { font-size: 8.5px; }
+  }
+  .home-screen__lang-btn { padding-left: 10px !important; padding-right: 10px !important; }
+  .home-screen__nav-actions { gap: 6px !important; }
 }

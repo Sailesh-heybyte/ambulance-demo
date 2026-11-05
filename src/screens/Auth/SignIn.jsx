@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { DEMO_OTP } from '../../mock/app';
-import GovtEmblem from '../../components/GovtEmblem';
 import ProtocolLeaders from '../../components/ProtocolLeaders';
+import BrandLogo from '../../components/BrandLogo';
 import './SignIn.scss';
 
 const SLIDES = [
@@ -71,16 +71,10 @@ export default function SignIn() {
       {/* Brand */}
       <div className={`signin__brand ${step !== 'welcome' ? 'signin__brand--compact' : ''}`}>
         <div className="signin__emblem">
-          <span className="signin__halo" />
-          <GovtEmblem size={step === 'welcome' ? 92 : 64} />
+          <BrandLogo size={step === 'welcome' ? 84 : 52} showText={false} />
         </div>
         <div className="signin__brand-text">
-          <h1>
-            <span className="signin__cross">
-              <i className="bi bi-plus-lg" />
-            </span>
-            108 Ambulance
-          </h1>
+          <h1><b>108</b> Ambulance</h1>
           <p>Emergency Response Service</p>
         </div>
       </div>
