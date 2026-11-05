@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import TrackingMap from './TrackingMap';
-import AmbulanceArt from '../../components/AmbulanceArt';
-import ProtocolLeaders from '../../components/ProtocolLeaders';
+import SearchingScreen from './SearchingScreen';
 import { useBooking } from '../../context/BookingContext';
 import { useDriverLocationAge, getCrewLocation } from '../../hooks/useGpsPublisher';
 import { hospitals } from '../../mock/hospitals';
@@ -10,6 +9,8 @@ import { fetchRoute } from '../../utils/route';
 import './Tracking.scss';
 import TripProgress from '../../components/TripProgress';
 const STEPS = 30; // each route is walked in 30 steps, one every 2 seconds
+// Demo drive time for each leg (station → patient, patient → hospital). Change to make it slower/faster.
+const DRIVE_MS = STEPS * 2000; // 60 seconds
 const FALLBACK_MINUTES = 8;
 
 const TITLES = {
@@ -38,15 +39,19 @@ export default function Tracking() {
   const hospitalPos = hospital ? [hospital.lat, hospital.lng] : null;
 
   const [step, setStep] = useState(unit ? 'map' : 'confirmed'); // 'confirmed' or 'map'
-  const [pickupIdx, setPickupIdx] = useState(0); // progress: station -> patient
-  const [tripIdx, setTripIdx] = useState(0); // progress: patient -> hospital
+  // When each drive started (fallback if the booking has no timestamp)
+  const driveStart = useRef({ accepted: Date.now(), picked: Date.now() });
+  const [now, setNow] = useState(() => Date.now()); // ticks every second for the ETA text
 
-  // Automatically transition directly to the live map as soon as a driver accepts
+  // A driver accepted: show the green tick for a moment, then open the live map
+  const [found, setFound] = useState(false);
   useEffect(() => {
-    if (unit || status === 'accepted') {
-      setStep('map');
-    }
-  }, [unit, status]);
+    if (!unit || step === 'map') return;
+    setFound(true);
+    if (navigator.vibrate) navigator.vibrate([60, 60, 120]);
+    const t = setTimeout(() => setStep('map'), 1600);
+    return () => clearTimeout(t);
+  }, [unit, step]);
 
   // Until the real roads load, each route is a straight line
   const [toPatient, setToPatient] = useState({
@@ -89,19 +94,12 @@ export default function Tracking() {
     };
   }, [pLat, pLng, hLat, hLng]);
 
-  // The ambulance moves along route 1 after the driver accepts
+  // The ambulance glides along the road (TrackingMap animates it); this tick only updates the ETA text
   useEffect(() => {
-    if (step !== 'map' || status !== 'accepted') return;
-    const timer = setInterval(() => setPickupIdx((i) => (i < STEPS ? i + 1 : i)), 2000);
+    if (step !== 'map') return;
+    const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
-  }, [step, status]);
-
-  // ...and along route 2 after the patient is picked up
-  useEffect(() => {
-    if (step !== 'map' || status !== 'picked') return;
-    const timer = setInterval(() => setTripIdx((i) => (i < STEPS ? i + 1 : i)), 2000);
-    return () => clearInterval(timer);
-  }, [step, status]);
+  }, [step]);
 
   // No booking (cancelled, finished or old data): go back home
   if (!booking || !patient) return <Navigate to="/" replace />;
@@ -113,16 +111,18 @@ export default function Tracking() {
     current.points.length > 1
       ? current
       : { ...current, points: onTrip ? [patient, hospitalPos] : [start, patient] };
-  const progress = onTrip
-    ? (status === 'hospital' ? STEPS : tripIdx) / STEPS
-    : (status === 'reached' ? STEPS : pickupIdx) / STEPS;
+  const legStart = onTrip
+    ? booking.pickedAt || driveStart.current.picked
+    : booking.acceptedAt || driveStart.current.accepted;
+  const legDone = status === 'reached' || status === 'hospital';
+  const progress = legDone ? 1 : Math.max(0, Math.min(1, (now - legStart) / DRIVE_MS));
   const minutesLeft = Math.max(1, Math.ceil(route.minutes * (1 - progress)));
 
   const etaText = {
     requested: 'Searching',
-    accepted: `${minutesLeft} min away`,
+    accepted: progress >= 0.98 ? 'Arriving now' : `${minutesLeft} min away`,
     reached: 'Now',
-    picked: `${minutesLeft} min to hospital`,
+    picked: progress >= 0.98 ? 'Arriving at hospital' : `${minutesLeft} min to hospital`,
     hospital: 'Done',
   }[status];
 
@@ -186,39 +186,8 @@ export default function Tracking() {
   };
    // While waiting for a driver, show the searching screen.
   // As soon as a driver accepts (unit is assigned), automatically show the live map.
-  if (!unit) {
-    return (
-      <div className="confirmed">
-        <div className="confirmed__topbar">
-          <button className="confirmed__back" onClick={handleCancel} aria-label="Back">
-            <i className="bi bi-chevron-left" />
-          </button>
-          <ProtocolLeaders variant="corner" size="xl" />
-        </div>
-
-        <div className="confirmed__art">
-          <AmbulanceArt />
-        </div>
-
-        <div className="confirmed__text">
-          <h1>Looking for the nearest ambulance</h1>
-          <p>
-            Your request has been sent to all ambulances on duty. Stay calm and speak gently to the patient.
-            Live GPS tracking will begin immediately when a driver accepts.
-          </p>
-        </div>
-
-
-        <div className="confirmed__actions">
-          <button className="confirmed__primary" disabled>
-            Searching for nearby responders…
-          </button>
-          <button className="confirmed__link" onClick={handleCancel}>
-            Cancel request
-          </button>
-        </div>
-      </div>
-    );
+  if (step !== 'map') {
+    return <SearchingScreen booking={booking} found={found} unit={unit} onCancel={handleCancel} />;
   }
 
   // ---------- Stage 2: live map ----------
@@ -226,7 +195,9 @@ export default function Tracking() {
     <div className="track">
       <TrackingMap
         path={route.points}
-        progress={progress}
+        startAt={legStart}
+        durationMs={DRIVE_MS}
+        done={legDone}
         patient={patient}
         hospital={hospitalChosen && hospital ? { name: hospital.name, position: hospitalPos } : null}
       />

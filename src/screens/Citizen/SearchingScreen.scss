@@ -1,0 +1,308 @@
+@use '../../styles/colors' as *;
+
+// Official "searching for ambulance" screen: white, calm, Govt. logo in the centre.
+.searching {
+  --size: clamp(160px, 29dvh, 250px);
+  height: 100dvh;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  padding: calc(clamp(12px, 2dvh, 20px) + env(safe-area-inset-top)) 20px calc(clamp(14px, 2.4dvh, 22px) + env(safe-area-inset-bottom));
+  background:
+    radial-gradient(120% 55% at 50% 0%, rgba(232, 71, 76, 0.13) 0%, rgba(232, 71, 76, 0) 70%),
+    #FFFFFF;
+  color: #111827;
+
+  // ---------- top bar ----------
+  &__topbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    animation: srch-fade 0.5s ease-out both;
+
+    .protocol-leaders--corner .protocol-leaders__badge {
+      color: #334155;
+      font-weight: 700;
+    }
+  }
+
+  &__back {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1.5px solid #E5E7EB;
+    background: #FFFFFF;
+    color: #111827;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease;
+    &:active { transform: scale(0.94); }
+  }
+
+  // ---------- radar ----------
+  &__radar {
+    --r: calc(var(--size) * 0.43);
+    position: relative;
+    width: var(--size);
+    height: var(--size);
+    margin: clamp(6px, 2dvh, 22px) auto clamp(10px, 2dvh, 20px);
+    flex-shrink: 0;
+  }
+
+  &__ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1.5px solid rgba(232, 71, 76, 0.35);
+    background: radial-gradient(circle, rgba(232, 71, 76, 0.07) 0%, rgba(232, 71, 76, 0) 70%);
+    animation: srch-radar 3s cubic-bezier(0.2, 0.6, 0.35, 1) infinite;
+    &--2 { animation-delay: 1s; }
+    &--3 { animation-delay: 2s; }
+  }
+
+  &__orbit {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: calc(var(--r) * 2);
+    height: calc(var(--r) * 2);
+    margin: calc(var(--r) * -1) 0 0 calc(var(--r) * -1);
+    border-radius: 50%;
+    border: 1.5px dashed rgba(17, 24, 39, 0.12);
+    animation: srch-spin 24s linear infinite;
+  }
+
+  &__dot {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0;
+    height: 0;
+    transform: rotate(var(--deg)) translateY(calc(var(--r) * -1)) rotate(calc(var(--deg) * -1));
+  }
+
+  &__dot-inner {
+    position: absolute;
+    left: -15px;
+    top: -15px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    color: $primary;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18), 0 0 0 2px rgba(232, 71, 76, 0.25);
+    animation: srch-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) var(--delay) both, srch-bob 2.4s ease-in-out calc(var(--delay) + 0.5s) infinite;
+  }
+
+  &__core {
+    position: absolute;
+    inset: 22%;
+    border-radius: 50%;
+    animation: srch-core 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+  }
+
+  &__emblem {
+    width: 100% !important;
+    height: 100% !important;
+    transition: box-shadow 0.4s ease;
+  }
+
+  &__tick {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: $green;
+    color: #FFFFFF;
+    font-size: calc(var(--size) * 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  // ---------- headline ----------
+  &__head {
+    text-align: center;
+    animation: srch-fade 0.5s ease-out 0.2s both;
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(20px, 3.2dvh, 25px);
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+    p {
+      margin: 0 auto;
+      max-width: 320px;
+      font-size: 13.5px;
+      line-height: 1.45;
+      color: #6B7280;
+    }
+  }
+
+  // ---------- live steps ----------
+  &__steps {
+    list-style: none;
+    margin: clamp(12px, 2.4dvh, 22px) 0 0;
+    padding: 4px 14px;
+    border: 1px solid #EEF0F3;
+    border-radius: 18px;
+    background: #FFFFFF;
+    box-shadow: 0 10px 26px -18px rgba(15, 23, 42, 0.35);
+    animation: srch-fade 0.5s ease-out 0.35s both;
+  }
+
+  &__step {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: clamp(8px, 1.4dvh, 12px) 0;
+
+    & + & { border-top: 1px solid #F1F3F6; }
+  }
+
+  &__step-icon {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    background: #F3F4F6;
+    color: #9CA3AF;
+  }
+
+  &__step.is-done &__step-icon {
+    background: $green-light;
+    color: $green;
+    animation: srch-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  &__step.is-active &__step-icon { background: $primary-light; }
+
+  &__spinner {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(232, 71, 76, 0.25);
+    border-top-color: $primary;
+    animation: srch-spin 0.8s linear infinite;
+  }
+
+  &__step-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.3;
+
+    b { font-size: 14px; font-weight: 700; color: #111827; }
+    small {
+      font-size: 12px;
+      color: #6B7280;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  // ---------- booking info ----------
+  &__info {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+    animation: srch-fade 0.5s ease-out 0.45s both;
+
+    > div {
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: #F7F8FA;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    small { font-size: 11px; font-weight: 600; color: #6B7280; }
+    b {
+      font-size: 12px;
+      font-weight: 800;
+      color: #111827;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  // ---------- cancel ----------
+  &__cancel {
+    margin-top: auto;
+    flex-shrink: 0;
+    width: 100%;
+    height: 52px;
+    border-radius: 999px;
+    border: 1.5px solid #E5E7EB;
+    background: #FFFFFF;
+    color: #B91C1C;
+    font-size: 15px;
+    font-weight: 700;
+    transition: transform 0.15s ease, background 0.2s ease;
+    &:active { transform: scale(0.98); background: #FEF2F2; }
+  }
+  &__info + &__cancel { margin-top: auto; }
+
+  // ---------- ambulance found ----------
+  &--found {
+    .searching__ring,
+    .searching__orbit { animation-play-state: paused; opacity: 0; transition: opacity 0.5s ease; }
+    .searching__dot-inner { opacity: 0; transform: scale(0.4); transition: opacity 0.3s ease, transform 0.3s ease; }
+    .searching__tick { opacity: 1; transform: scale(1); }
+    .searching__emblem { box-shadow: 0 0 0 3px #FFFFFF, 0 0 0 5px $green, 0 14px 30px -10px rgba(22, 163, 74, 0.45); }
+  }
+}
+
+// Give the cancel button room to sit at the bottom
+.searching > .searching__info { margin-bottom: 14px; }
+
+// Short phones: drop the helper text so everything fits
+@media (max-height: 680px) {
+  .searching__head p { display: none; }
+}
+
+@keyframes srch-radar {
+  0% { transform: scale(0.35); opacity: 0.9; }
+  100% { transform: scale(1); opacity: 0; }
+}
+@keyframes srch-spin { to { transform: rotate(360deg); } }
+@keyframes srch-pop {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes srch-bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -3px; }
+}
+@keyframes srch-core {
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes srch-fade {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .searching *, .searching *::before { animation: none !important; }
+}

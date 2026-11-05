@@ -16,8 +16,10 @@
     gap: 12px;
 
     .protocol-leaders__badge { gap: 8px; min-width: 0; flex: 1; }
-    .protocol-leaders__title { white-space: normal; }
-    .protocol-leaders__emblem { width: 26px; height: 26px; }
+    .protocol-leaders__title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    text-align: left;
+    .protocol-leaders__avatar-wrap { width: 48px; height: 48px; }
+    .protocol-leaders__emblem { box-shadow: 0 0 0 1.5px #D4A73A; }
     .protocol-leaders__avatars { gap: 6px; }
   }
 

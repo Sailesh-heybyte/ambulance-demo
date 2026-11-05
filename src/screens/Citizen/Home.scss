@@ -528,3 +528,243 @@
     }
   }
 }
+
+/* ===================================================================
+   Responsive fit: the whole Home screen fits exactly in one phone
+   screen (no scrolling, buttons never cut off). Sizes scale with the
+   screen height (dvh = visible height, ignoring the browser's bars).
+   =================================================================== */
+.home-screen {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding-top: calc(clamp(8px, 1.5dvh, 12px) + env(safe-area-inset-top));
+
+  &__protocol-wrapper { margin-bottom: clamp(8px, 1.6dvh, 14px); flex-shrink: 0; }
+  &__navbar { margin-bottom: clamp(8px, 1.8dvh, 18px); flex-shrink: 0; }
+  &__greeting-section { margin-bottom: clamp(10px, 2.2dvh, 18px); flex-shrink: 0; }
+  &__salutation { font-size: clamp(15px, 2.2dvh, 18px); }
+  &__user-name {
+    font-size: clamp(28px, 4.8dvh, 38px);
+    margin: 0 0 clamp(6px, 1.2dvh, 10px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__emergency-card {
+    min-height: 0;
+    padding-top: clamp(14px, 2.8dvh, 28px);
+    padding-bottom: calc(clamp(12px, 2.4dvh, 24px) + env(safe-area-inset-bottom));
+  }
+
+  // SOS button + rings scale together with the screen
+  &__pulse-container {
+    --sos: clamp(170px, 31dvh, 270px);
+    width: var(--sos);
+    height: var(--sos);
+    margin: auto auto clamp(6px, 1.4dvh, 14px); // centred in the red card
+  }
+  &__pulse-ring--outer { width: 98%; height: 98%; }
+  &__pulse-ring--mid { width: 82%; height: 82%; }
+  &__sos-button { width: 67%; height: 67%; }
+  &__sos-label { font-size: calc(var(--sos) * 0.21); }
+  &__sos-sublabel { font-size: clamp(12px, 1.7dvh, 13.5px); }
+  &__requested-title { font-size: clamp(16px, 2.5dvh, 20px); }
+
+  &__card-info { padding: 0 0 clamp(8px, 1.6dvh, 16px); }
+  &__card-heading { font-size: clamp(19px, 2.9dvh, 23px); }
+
+  &__action-row { margin-top: auto; flex-shrink: 0; }
+  &__action-pill {
+    padding: clamp(12px, 1.8dvh, 15px) 12px;
+    white-space: nowrap;
+    font-size: clamp(13px, 3.6vw, 14px);
+  }
+}
+
+// Very short screens (small phones, or with the keyboard/browser bars showing)
+@media (max-height: 640px) {
+  .home-screen__card-subheading { display: none; }
+  .home-screen__salutation { display: none; }
+}
+
+/* ===================== Interactive top section ===================== */
+.home-screen__protocol-wrapper {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 20px;
+  transition: transform 0.18s ease;
+  &:active { transform: scale(0.985); }
+}
+
+// Live service status under the name
+.home-screen__live {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 clamp(8px, 1.4dvh, 12px);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #15803D;
+}
+.home-screen__live-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #16A34A;
+  flex-shrink: 0;
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: rgba(22, 163, 74, 0.35);
+    animation: home-ping 1.8s ease-out infinite;
+  }
+}
+
+// Location chip with a live GPS pulse
+.home-screen__location-chip { gap: 8px; padding-left: 10px; }
+.home-screen__gps {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: rgba(220, 38, 38, 0.2);
+    animation: home-ping 2s ease-out infinite;
+  }
+  .home-screen__location-pin { position: relative; }
+}
+.home-screen__live-tag {
+  flex-shrink: 0;
+  margin-left: 2px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #FEE2E2;
+  color: #B91C1C;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+// Buttons give a small "press" feel
+.home-screen__lang-btn,
+.home-screen__menu-btn,
+.home-screen__location-chip,
+.home-screen__action-pill { transition: transform 0.15s ease, background 0.2s ease; }
+.home-screen__lang-btn:active,
+.home-screen__menu-btn:active,
+.home-screen__action-pill:active { transform: scale(0.95); }
+
+// Entrance: each block slides up one after another
+.home-anim {
+  animation: home-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+.home-anim--card { animation-name: home-card; }
+
+@keyframes home-rise {
+  0% { opacity: 0; transform: translateY(14px); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes home-card {
+  0% { opacity: 0; transform: translateY(40px); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes home-ping {
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-anim, .home-screen__live-dot::after, .home-screen__gps::before { animation: none; }
+}
+@media (max-height: 640px) {
+  .home-screen__live { display: none; }
+}
+
+/* ===================== Official info sheet ===================== */
+.official-card {
+  padding: 4px 2px 8px;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px;
+    border-radius: 16px;
+    background: #FFFBF0;
+    border: 1px solid #F1E3B8;
+
+    b { display: block; font-size: 15px; font-weight: 800; color: #111827; }
+    span { display: block; margin-top: 2px; font-size: 12.5px; color: #6B7280; }
+  }
+
+  &__leaders {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  &__leader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 14px 8px;
+    border-radius: 16px;
+    background: #F8FAFC;
+    text-align: center;
+
+    b { font-size: 13.5px; font-weight: 800; color: #111827; }
+    span { font-size: 12px; color: #6B7280; }
+  }
+
+  &__photo {
+    width: 76px;
+    height: 76px;
+    margin-bottom: 6px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #FFFFFF;
+    box-shadow: 0 0 0 2px #D4A73A, 0 8px 18px -8px rgba(15, 23, 42, 0.4);
+
+    img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+  }
+
+  &__facts {
+    list-style: none;
+    margin: 14px 0 0;
+    padding: 0;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 2px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #374151;
+      border-top: 1px solid #F1F3F6;
+    }
+    i { color: #DC2626; font-size: 16px; }
+  }
+}

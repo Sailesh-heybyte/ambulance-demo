@@ -1,9 +1,10 @@
 import React from 'react';
 import cbnImg from '@/assets/protocol/cbn.jpg';
 import lokeshImg from '@/assets/protocol/lokesh.jpg';
+import GovtEmblem from './GovtEmblem';
 import './ProtocolLeaders.scss';
 
-const LEADERS = [
+export const LEADERS = [
   {
     id: 'cbn',
     name: 'N. Chandrababu Naidu',
@@ -32,13 +33,7 @@ export default function ProtocolLeaders({
       {/* State Insignia / Title */}
       {showBadge && (
         <div className="protocol-leaders__badge">
-          <svg className="protocol-leaders__emblem" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z"
-              fill="#DC2626"
-            />
-            <path d="M11 7h2v4h4v2h-4v4h-2v-4H7v-2h4V7z" fill="#FFFFFF" />
-          </svg>
+          <GovtEmblem size={variant === 'ribbon' ? 32 : 22} className="protocol-leaders__emblem" />
           <span className="protocol-leaders__titles">
             <span className="protocol-leaders__title">Govt. of Andhra Pradesh</span>
             {showSub && <span className="protocol-leaders__dept">Health &amp; Family Welfare Dept.</span>}

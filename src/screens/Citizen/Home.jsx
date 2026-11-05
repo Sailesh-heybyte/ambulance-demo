@@ -6,7 +6,9 @@ import Sheet from '../../components/Sheet';
 import { pickupSpots } from '../../mock/ambulance';
 import { getPickup, savePickup } from '../../utils/dispatch';
 import { useBooking } from '../../context/BookingContext';
-import ProtocolLeaders from '../../components/ProtocolLeaders';
+import ProtocolLeaders, { LEADERS } from '../../components/ProtocolLeaders';
+import GovtEmblem from '../../components/GovtEmblem';
+import { ambulanceUnits } from '../../mock/ambulance';
 import './Home.scss';
 
 export default function Home() {
@@ -19,6 +21,13 @@ export default function Home() {
   const [spotOpen, setSpotOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [officialOpen, setOfficialOpen] = useState(false);
+
+  // Greeting changes with the time of day
+  const hour = new Date().getHours();
+  const timeGreeting = hour < 12 ? 'Good morning,' : hour < 17 ? 'Good afternoon,' : 'Good evening,';
+  const onDuty = ambulanceUnits.length;
+  const tap = () => navigator.vibrate?.(10);
   const [lang, setLang] = useState('te'); // 'te' (Telugu) | 'en' (English)
 
   // Active booking detection
@@ -44,12 +53,21 @@ export default function Home() {
   return (
     <div className="home-screen">
       {/* --- Top Official Protocol Leadership Ribbon --- */}
-      <div className="home-screen__protocol-wrapper">
+      <button
+        type="button"
+        className="home-screen__protocol-wrapper home-anim"
+        style={{ '--i': 0 }}
+        onClick={() => {
+          tap();
+          setOfficialOpen(true);
+        }}
+        aria-label="About this Government of Andhra Pradesh service"
+      >
         <ProtocolLeaders variant="ribbon" size="lg" />
-      </div>
+      </button>
 
       {/* --- Top App Bar (108 Ambulance + Language + Menu) --- */}
-      <header className="home-screen__navbar">
+      <header className="home-screen__navbar home-anim" style={{ '--i': 1 }}>
         <div className="home-screen__brand">
           <div className="home-screen__cross-badge">
             <i className="bi bi-plus-lg" />
@@ -80,24 +98,37 @@ export default function Home() {
 
       {/* --- Greeting & User Identity --- */}
       <section className="home-screen__greeting-section">
-        <p className="home-screen__salutation">
-          {lang === 'te' ? 'Namaskaram,' : 'Good day,'}
+        <p className="home-screen__salutation home-anim" style={{ '--i': 2 }}>
+          {lang === 'te' ? 'Namaskaram,' : timeGreeting}
         </p>
-        <h1 className="home-screen__user-name">{user.name}</h1>
+        <h1 className="home-screen__user-name home-anim" style={{ '--i': 3 }}>{user.name}</h1>
 
-        {/* Location Chip */}
+        {/* Live service status */}
+        <p className="home-screen__live home-anim" style={{ '--i': 4 }}>
+          <span className="home-screen__live-dot" />
+          {onDuty} ambulances on duty near you · avg 7 min
+        </p>
+
+        {/* Location Chip (live GPS) */}
         <button
           type="button"
-          className="home-screen__location-chip"
-          onClick={() => setSpotOpen(true)}
+          className="home-screen__location-chip home-anim"
+          style={{ '--i': 5 }}
+          onClick={() => {
+            tap();
+            setSpotOpen(true);
+          }}
         >
-          <i className="bi bi-geo-alt-fill home-screen__location-pin" />
+          <span className="home-screen__gps">
+            <i className="bi bi-geo-alt-fill home-screen__location-pin" />
+          </span>
           <span className="home-screen__location-text">{pickup.address}</span>
+          <span className="home-screen__live-tag">LIVE</span>
         </button>
       </section>
 
       {/* --- Main Red Emergency Card (Fills down to the bottom edge) --- */}
-      <section className="home-screen__emergency-card">
+      <section className="home-screen__emergency-card home-anim home-anim--card" style={{ '--i': 6 }}>
         {/* Pulsing Outer Concentric Rings */}
         <div className="home-screen__pulse-container">
           <span className="home-screen__pulse-ring home-screen__pulse-ring--outer" />
@@ -185,6 +216,35 @@ export default function Home() {
               <span>{s.address}</span>
             </button>
           ))}
+        </div>
+      </Sheet>
+
+      {/* --- Official service info (tap the Govt. strip) --- */}
+      <Sheet open={officialOpen} onClose={() => setOfficialOpen(false)} title="Official Government Service">
+        <div className="official-card">
+          <div className="official-card__head">
+            <GovtEmblem size={64} />
+            <div>
+              <b>Government of Andhra Pradesh</b>
+              <span>Department of Health, Medical &amp; Family Welfare</span>
+            </div>
+          </div>
+          <div className="official-card__leaders">
+            {LEADERS.map((l) => (
+              <div key={l.id} className="official-card__leader">
+                <span className="official-card__photo">
+                  <img src={l.src} alt={l.name} />
+                </span>
+                <b>{l.name}</b>
+                <span>{l.title}</span>
+              </div>
+            ))}
+          </div>
+          <ul className="official-card__facts">
+            <li><i className="bi bi-shield-check" /> 108 Emergency Response Service</li>
+            <li><i className="bi bi-currency-rupee" /> Free of cost for every citizen</li>
+            <li><i className="bi bi-clock-history" /> Available 24 × 7 across Andhra Pradesh</li>
+          </ul>
         </div>
       </Sheet>
 

@@ -245,3 +245,47 @@
 .tracking-map .leaflet-tile-pane {
   filter: grayscale(0.85) brightness(1.06) contrast(0.92);
 }
+
+/* ---------- Top-view ambulance marker (moves smoothly on the map) ---------- */
+.amb-top {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &__pulse {
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: rgba(232, 71, 76, 0.22);
+    animation: amb-pulse 1.8s ease-out infinite;
+  }
+
+  &__body {
+    position: relative;
+    display: flex;
+    filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.25));
+    will-change: transform;
+  }
+
+  &__light { animation: amb-blink 0.9s steps(1) infinite; }
+  &__light--red { fill: #E8474C; }
+  &__light--blue { fill: #2563EB; animation-delay: 0.45s; }
+
+  &--arrived &__pulse { animation: none; opacity: 0.6; }
+  &--arrived &__light { animation: none; opacity: 0.35; }
+}
+
+@keyframes amb-pulse {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+@keyframes amb-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.25; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .amb-top__pulse, .amb-top__light { animation: none; }
+}
