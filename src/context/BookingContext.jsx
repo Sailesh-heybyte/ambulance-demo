@@ -68,6 +68,7 @@ export function BookingProvider({ children }) {
     save({
       ...latest,
       status: 'accepted',
+      acceptedAt: Date.now(), // the citizen map starts the drive from here
       ambulance: {
         id: unit.id,
         station: unit.station,
@@ -81,7 +82,7 @@ export function BookingProvider({ children }) {
     });
     return true;
   };
-  const updateStatus = (status) => save({ ...booking, status });
+  const updateStatus = (status) => save({ ...booking, status, ...(status === 'picked' ? { pickedAt: Date.now() } : {}) });
    const updateBooking = (patch) => save({ ...booking, ...patch });
   const clearBooking = () => save(null);
   // Trip finished: keep it in "Your trips", then clear the live booking
