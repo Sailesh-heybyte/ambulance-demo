@@ -1,0 +1,50 @@
+.page-head {
+  padding-top: calc(12px + env(safe-area-inset-top));
+  margin-bottom: 18px;
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  &__back,
+  &__icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    font-size: 19px;
+  }
+
+  &__back {
+    background: #fff;
+    border: 1px solid #ECEAE4;
+    color: #111827;
+  }
+
+  &__icon {
+    background: #FDECEC;
+    color: #DC2626;
+  }
+
+  &__text {
+    min-width: 0;
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #111827;
+    }
+    p {
+      margin: 3px 0 0;
+      font-size: 13.5px;
+      color: #6B7280;
+      line-height: 1.4;
+    }
+  }
+}

@@ -211,7 +211,7 @@ export default function Tracking() {
           <h3>{TITLES[status]}</h3>
           <span className="track__eta">{etaText}</span>
         </div>
-        <TripProgress status={status} />
+        <div className="track__progress"><TripProgress status={status} /></div>
         <p className="track__notified">
           <i className="bi bi-bell-fill" />{' '}
           {booking.notified?.length
@@ -230,11 +230,11 @@ export default function Tracking() {
 
         <div className="track__driver">
           <div className="track__avatar">{unit.driver.charAt(0)}</div>
-          <div>
+          <div className="track__driver-info">
             <h4>{unit.driver}</h4>
-            <p>Ambulance {unit.number}</p>
-            <p>From {unit.station}</p>
+            <p>{unit.station}</p>
           </div>
+          <span className="track__plate">{unit.number}</span>
         </div>
 
         {hospitalChosen && (
@@ -256,7 +256,8 @@ export default function Tracking() {
           className="track__aid"
           onClick={() => navigate('/first-aid', { state: { id: booking.type } })}
         >
-          <i className="bi bi-heart-pulse-fill" /> First aid tips while you wait
+          <i className="bi bi-heart-pulse-fill" /> <span>First aid tips while you wait</span>
+          <i className="bi bi-chevron-right" />
         </button>
 
         <button

@@ -1,39 +1,46 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { APP_NAME, DEMO_OTP } from '../../mock/app';
-import AmbulanceHero from '../../components/AmbulanceHero';
+import { DEMO_OTP } from '../../mock/app';
+import GovtEmblem from '../../components/GovtEmblem';
+import ProtocolLeaders from '../../components/ProtocolLeaders';
 import './SignIn.scss';
 
 const SLIDES = [
-  {
-    title: 'Rapid emergency response',
-    desc: 'Book verified ambulances in seconds with real-time GPS tracking and 24/7 care.',
-  },
-  {
-    title: 'Real-time GPS live tracking',
-    desc: 'Watch your emergency responder navigate traffic with accurate real-time arrival estimates.',
-  },
-  {
-    title: 'Pre-arrival hospital sync',
-    desc: 'Vital patient status and emergency trauma bed availability prepared before arrival.',
-  },
+  { icon: 'bi-lightning-charge-fill', title: 'One tap SOS', desc: 'Book the nearest ambulance in seconds – no forms, no waiting.' },
+  { icon: 'bi-geo-alt-fill', title: 'Live GPS tracking', desc: 'Watch the ambulance come to you on the map, minute by minute.' },
+  { icon: 'bi-hospital-fill', title: 'Hospital ready on arrival', desc: 'The emergency team is alerted before the patient reaches.' },
 ];
+
+const RESEND_SECONDS = 30;
 
 export default function SignIn() {
   const { login } = useAuth();
   const [step, setStep] = useState('welcome'); // 'welcome' | 'phone' | 'otp'
-  const [activeSlide, setActiveSlide] = useState(0);
+  const [slide, setSlide] = useState(0);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
+  const [resendIn, setResendIn] = useState(RESEND_SECONDS);
+  const otpRef = useRef(null);
 
-  const handleNextSlide = () => {
-    if (activeSlide < SLIDES.length - 1) {
-      setActiveSlide((prev) => prev + 1);
-    } else {
-      setStep('phone');
-    }
+  // Feature slides change on their own on the welcome step
+  useEffect(() => {
+    if (step !== 'welcome') return;
+    const t = setInterval(() => setSlide((s) => (s + 1) % SLIDES.length), 3500);
+    return () => clearInterval(t);
+  }, [step]);
+
+  // "Resend code" countdown on the OTP step
+  useEffect(() => {
+    if (step !== 'otp' || resendIn <= 0) return;
+    const t = setTimeout(() => setResendIn((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [step, resendIn]);
+
+  const go = (next) => {
+    setError('');
+    setStep(next);
   };
 
   const sendCode = (e) => {
@@ -41,201 +48,202 @@ export default function SignIn() {
     const digits = phone.replace(/\D/g, '');
     if (!name.trim()) return setError('Please enter your full name.');
     if (digits.length !== 10) return setError('Enter a valid 10-digit mobile number.');
-    setError('');
-    setStep('otp');
+    setOtp('');
+    setResendIn(RESEND_SECONDS);
+    go('otp');
   };
 
   const verify = (e) => {
     e?.preventDefault();
+    if (otp.length !== 6) return setError('Enter the 6-digit code.');
     if (otp !== DEMO_OTP) return setError(`Invalid code. Try demo code ${DEMO_OTP}.`);
+    navigator.vibrate?.(20);
     login(name.trim(), phone.replace(/\D/g, ''));
   };
 
   return (
-    <div className="auth-screen">
-      {/* --- Top Area (Off-white / Warm canvas) --- */}
-      <div className="auth-screen__canvas">
-        {/* Mobile Status Bar Simulation / Spacing */}
-        <div className="auth-screen__status-bar">
-          <span className="auth-screen__time">9:41</span>
-          <div className="auth-screen__status-icons">
-            <i className="bi bi-reception-4" />
-            <i className="bi bi-wifi" />
-            <i className="bi bi-battery-full" />
-          </div>
+    <div className="signin">
+      {/* Official header */}
+      <div className="signin__protocol">
+        <ProtocolLeaders variant="ribbon" size="lg" />
+      </div>
+
+      {/* Brand */}
+      <div className={`signin__brand ${step !== 'welcome' ? 'signin__brand--compact' : ''}`}>
+        <div className="signin__emblem">
+          <span className="signin__halo" />
+          <GovtEmblem size={step === 'welcome' ? 92 : 64} />
         </div>
-
-        {/* Brand Header (Editorial Serif) */}
-        <header className="auth-screen__header">
-          <h1 className="auth-screen__brand">{APP_NAME}.</h1>
-        </header>
-
-        {/* Hero Illustration: Ambulance on Ground Baseline */}
-        <div className="auth-screen__hero">
-          <AmbulanceHero />
-        </div>
-
-        {/* Pagination Dots (3-indicator with active red pill) */}
-        <div className="auth-screen__pagination" role="tablist" aria-label="Slide indicators">
-          {SLIDES.map((_, index) => {
-            const isActive = step === 'welcome' ? activeSlide === index : false;
-            return (
-              <button
-                key={index}
-                type="button"
-                className={`auth-screen__dot ${isActive ? 'auth-screen__dot--active' : ''}`}
-                onClick={() => {
-                  setStep('welcome');
-                  setActiveSlide(index);
-                }}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            );
-          })}
+        <div className="signin__brand-text">
+          <h1>
+            <span className="signin__cross">
+              <i className="bi bi-plus-lg" />
+            </span>
+            108 Ambulance
+          </h1>
+          <p>Emergency Response Service</p>
         </div>
       </div>
 
-      {/* --- Bottom Rounded Red Card --- */}
-      <section className="auth-screen__card">
+      {/* Bottom card */}
+      <section className="signin__card" key={step}>
         {step === 'welcome' && (
-          <div className="auth-screen__card-content auth-screen__card-content--welcome">
-            <h2 className="auth-screen__card-title">{SLIDES[activeSlide].title}</h2>
-            <p className="auth-screen__card-desc">{SLIDES[activeSlide].desc}</p>
+          <div className="signin__content">
+            <div className="signin__slides" aria-live="polite">
+              <div className="signin__slide" key={slide}>
+                <span className="signin__slide-icon">
+                  <i className={`bi ${SLIDES[slide].icon}`} />
+                </span>
+                <div>
+                  <h2>{SLIDES[slide].title}</h2>
+                  <p>{SLIDES[slide].desc}</p>
+                </div>
+              </div>
+              <div className="signin__dots" role="tablist" aria-label="Features">
+                {SLIDES.map((s, i) => (
+                  <button
+                    key={s.title}
+                    type="button"
+                    role="tab"
+                    aria-selected={i === slide}
+                    aria-label={s.title}
+                    className={`signin__dot ${i === slide ? 'is-active' : ''}`}
+                    onClick={() => setSlide(i)}
+                  />
+                ))}
+              </div>
+            </div>
 
-            <button
-              type="button"
-              className="auth-screen__pill-btn"
-              onClick={() => setStep('phone')}
-            >
-              Continue Now
+            <button type="button" className="signin__primary" onClick={() => go('phone')}>
+              Continue with mobile number <i className="bi bi-arrow-right" />
             </button>
+
+            <ul className="signin__trust">
+              <li><i className="bi bi-shield-check" /> Official</li>
+              <li><i className="bi bi-currency-rupee" /> Free service</li>
+              <li><i className="bi bi-clock-history" /> 24 × 7</li>
+            </ul>
           </div>
         )}
 
         {step === 'phone' && (
-          <form className="auth-screen__card-content auth-screen__card-content--form" onSubmit={sendCode}>
-            <div className="auth-screen__card-top-row">
-              <button
-                type="button"
-                className="auth-screen__back-btn"
-                onClick={() => {
-                  setError('');
-                  setStep('welcome');
-                }}
-                aria-label="Back to welcome"
-              >
+          <form className="signin__content" onSubmit={sendCode} noValidate>
+            <div className="signin__title-row">
+              <button type="button" className="signin__back" onClick={() => go('welcome')} aria-label="Back">
                 <i className="bi bi-arrow-left" />
               </button>
-              <h2 className="auth-screen__card-title auth-screen__card-title--compact">
-                Sign In
-              </h2>
+              <div>
+                <h2>Sign in</h2>
+                <p>Your name and mobile number help the crew reach you.</p>
+              </div>
             </div>
 
-            <p className="auth-screen__card-desc auth-screen__card-desc--compact">
-              Enter your name and mobile to request emergency medical dispatch.
-            </p>
-
-            <div className="auth-screen__field">
-              <label htmlFor="auth-name">Your Full Name</label>
-              <div className="auth-screen__input-wrapper">
-                <i className="bi bi-person-fill" />
+            <label className="signin__field">
+              <span>Full name</span>
+              <span className="signin__input">
+                <i className="bi bi-person" />
                 <input
-                  id="auth-name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Alex Morgan"
+                  placeholder="e.g. Suresh Kumar"
                   autoComplete="name"
                   autoFocus
                 />
-              </div>
-            </div>
+              </span>
+            </label>
 
-            <div className="auth-screen__field">
-              <label htmlFor="auth-phone">Mobile Number</label>
-              <div className="auth-screen__input-wrapper">
-                <span className="auth-screen__country-prefix">+91</span>
+            <label className="signin__field">
+              <span>Mobile number</span>
+              <span className="signin__input">
+                <span className="signin__prefix">+91</span>
                 <input
-                  id="auth-phone"
                   type="tel"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   placeholder="10-digit number"
                   inputMode="numeric"
-                  maxLength={10}
                   autoComplete="tel"
                 />
+              </span>
+            </label>
+
+            {error && (
+              <div className="signin__error" role="alert">
+                <i className="bi bi-exclamation-circle-fill" /> {error}
               </div>
-            </div>
+            )}
 
-            {error && <div className="auth-screen__error-pill"><i className="bi bi-exclamation-circle-fill" /> {error}</div>}
-
-            <button type="submit" className="auth-screen__pill-btn">
-              Send Verification Code
+            <button type="submit" className="signin__primary">
+              Send OTP
             </button>
+            <p className="signin__fine">We'll send a 6-digit code by SMS to verify your number.</p>
           </form>
         )}
 
         {step === 'otp' && (
-          <form className="auth-screen__card-content auth-screen__card-content--form" onSubmit={verify}>
-            <div className="auth-screen__card-top-row">
-              <button
-                type="button"
-                className="auth-screen__back-btn"
-                onClick={() => {
-                  setError('');
-                  setStep('phone');
-                }}
-                aria-label="Change phone number"
-              >
+          <form className="signin__content" onSubmit={verify} noValidate>
+            <div className="signin__title-row">
+              <button type="button" className="signin__back" onClick={() => go('phone')} aria-label="Change phone number">
                 <i className="bi bi-arrow-left" />
               </button>
-              <h2 className="auth-screen__card-title auth-screen__card-title--compact">
-                Verification
-              </h2>
+              <div>
+                <h2>Verify your number</h2>
+                <p>
+                  Code sent to <b>+91 {phone.slice(0, 5)} {phone.slice(5)}</b>
+                </p>
+              </div>
             </div>
 
-            <p className="auth-screen__card-desc auth-screen__card-desc--compact">
-              We sent a 6-digit code to <strong>+91 {phone}</strong>
-            </p>
-
-            <div className="auth-screen__field">
-              <label htmlFor="auth-otp">Enter 6-Digit Code</label>
+            {/* 6 boxes drawn over one real input (works with SMS auto-fill) */}
+            <div className="signin__otp" onClick={() => otpRef.current?.focus()}>
               <input
-                id="auth-otp"
-                className="auth-screen__otp-input"
+                ref={otpRef}
+                className="signin__otp-input"
                 type="text"
                 value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                placeholder="······"
+                onChange={(e) => {
+                  setError('');
+                  setOtp(e.target.value.replace(/\D/g, '').slice(0, 6));
+                }}
                 inputMode="numeric"
-                maxLength={6}
+                autoComplete="one-time-code"
+                aria-label="6-digit code"
                 autoFocus
               />
+              {Array.from({ length: 6 }).map((_, i) => (
+                <span key={i} className={`signin__otp-box ${i === otp.length ? 'is-current' : ''} ${otp[i] ? 'is-filled' : ''}`}>
+                  {otp[i] || ''}
+                </span>
+              ))}
             </div>
 
-            <div className="auth-screen__demo-badge">
-              <i className="bi bi-key-fill" /> Demo Code: <strong>{DEMO_OTP}</strong>
+            <div className="signin__otp-meta">
+              <span className="signin__demo">
+                <i className="bi bi-key-fill" /> Demo code <b>{DEMO_OTP}</b>
+              </span>
+              {resendIn > 0 ? (
+                <span className="signin__resend">Resend in 0:{String(resendIn).padStart(2, '0')}</span>
+              ) : (
+                <button type="button" className="signin__resend signin__resend--btn" onClick={() => setResendIn(RESEND_SECONDS)}>
+                  Resend code
+                </button>
+              )}
             </div>
 
-            {error && <div className="auth-screen__error-pill"><i className="bi bi-exclamation-circle-fill" /> {error}</div>}
+            {error && (
+              <div className="signin__error" role="alert">
+                <i className="bi bi-exclamation-circle-fill" /> {error}
+              </div>
+            )}
 
-            <button type="submit" className="auth-screen__pill-btn">
-              Verify &amp; Continue
-            </button>
-
-            <button
-              type="button"
-              className="auth-screen__sublink"
-              onClick={() => {
-                setError('');
-                setStep('phone');
-              }}
-            >
-              Change Phone Number
+            <button type="submit" className="signin__primary" disabled={otp.length !== 6}>
+              Verify &amp; continue
             </button>
           </form>
         )}
+
+        <p className="signin__footer">Department of Health, Medical &amp; Family Welfare · Govt. of Andhra Pradesh</p>
       </section>
     </div>
   );

@@ -10,6 +10,9 @@ import './Crew.scss';
 import { ambulanceUnits } from '../../mock/ambulance';
 import { distanceKm } from '../../utils/geo';
 import { useStaff } from '../../context/StaffAuthContext';
+import GovtEmblem from '../../components/GovtEmblem';
+import ProtocolLeaders from '../../components/ProtocolLeaders';
+import TripProgress from '../../components/TripProgress';
 const QUEUE_KEY = 'ambulance_crew_queue';
 
 // For each status, which button the driver sees and what it changes to
@@ -34,9 +37,28 @@ function gpsText(network, gps) {
   }
 }
 
-function StatusBar({ network, gps }) {
+function CrewHeader({ crew, onDuty, onLogout }) {
   return (
-    <div className="crew-bar">
+    <header className="crew-head">
+      <GovtEmblem size={38} />
+      <div className="crew-head__text">
+        <strong>108 Crew</strong>
+        <span>{crew.number}</span>
+      </div>
+      <span className={`crew-head__duty ${onDuty ? 'is-on' : ''}`}>
+        <i /> {onDuty ? 'On duty' : 'Off duty'}
+      </span>
+      <button className="crew-head__out" onClick={onLogout} aria-label="Log out">
+        <i className="bi bi-box-arrow-right" />
+      </button>
+    </header>
+  );
+}
+
+function StatusBar({ network, gps }) {
+  const ok = network && gps.state === 'ok';
+  return (
+    <div className={`crew-bar ${ok ? 'crew-bar--ok' : ''}`}>
       {!network && (
         <div className="crew-bar__offline">
           <i className="bi bi-wifi-off" /> Offline. Updates will be sent when you reconnect.
@@ -150,16 +172,46 @@ export default function Crew() {
       alert('Another driver has already accepted this request.');
     }
   };
-  const bar = <StatusBar network={network} gps={gps} />;
+  const bar = (
+    <>
+      <CrewHeader crew={crew} onDuty={onDuty} onLogout={() => logout('crew')} />
+      <StatusBar network={network} gps={gps} />
+    </>
+  );
+  const initials = crew.name.split(' ').map((w) => w[0]).slice(0, 2).join('');
 
   // ---------- 1. Off duty ----------
   if (!onDuty) {
     return (
-      <div className="crew crew--center">
-        <div className="crew__logo"><i className="bi bi-truck-front-fill" /></div>
-        <h2>Ambulance Crew</h2>
-                   <p>{crew.name} · {crew.number}</p>
-        <button className="crew__big" onClick={goOnDuty}>Go on duty</button>
+      <div className="crew crew--off">
+        <ProtocolLeaders variant="ribbon" />
+        <div className="crew__hello">
+          <p>Ambulance Crew Portal</p>
+          <h1>Good to see you, {crew.name.split(' ')[0]}</h1>
+        </div>
+
+        <div className="crew__profile">
+          <div className="crew__avatar">{initials}</div>
+          <div className="crew__who">
+            <strong>{crew.name}</strong>
+            <span>Driver · 108 Emergency Services</span>
+          </div>
+        </div>
+        <dl className="crew__facts">
+          <div><dt>Vehicle</dt><dd>{crew.number}</dd></div>
+          <div><dt>Base station</dt><dd>{crew.station}</dd></div>
+          <div><dt>Network</dt><dd className={network ? 'ok' : 'bad'}>{network ? 'Online' : 'Offline'}</dd></div>
+        </dl>
+
+        <div className="crew__checks">
+          <p><i className="bi bi-geo-alt" /> Your location is shared only while on duty</p>
+          <p><i className="bi bi-volume-up" /> Keep the phone volume up for job alerts</p>
+        </div>
+
+        <div className="crew__spacer" />
+        <button className="crew__big" onClick={goOnDuty}>
+          <i className="bi bi-power" /> Go on duty
+        </button>
         <button className="crew__link" onClick={() => logout('crew')}>Log out</button>
       </div>
     );
@@ -168,12 +220,21 @@ export default function Crew() {
   // ---------- 2. On duty, no job ----------
   if (!booking) {
     return (
-      <div className="crew crew--center">
+      <div className="crew">
         {bar}
-        <div className="crew__pulse"><i className="bi bi-broadcast" /></div>
-        <h2>You are on duty</h2>
-        <p>Waiting for emergency calls…</p>
-             <button className="crew__link" onClick={() => logout('crew')}>Log out</button>
+        <div className="crew__wait">
+          <div className="crew__radar">
+            <span /><span /><span />
+            <i className="bi bi-broadcast" />
+          </div>
+          <h2>Waiting for emergency calls</h2>
+          <p>New requests near {crew.station} will ring on this phone.</p>
+        </div>
+        <dl className="crew__facts">
+          <div><dt>Vehicle</dt><dd>{crew.number}</dd></div>
+          <div><dt>Driver</dt><dd>{crew.name}</dd></div>
+          <div><dt>Station</dt><dd>{crew.station}</dd></div>
+        </dl>
       </div>
     );
   }
@@ -186,17 +247,25 @@ export default function Crew() {
       : null;
 
     return (
-      <div className="alert">
+      <div className="crew alert">
         {bar}
-        <div className="alert__icon"><i className="bi bi-bell-fill" /></div>
-        <h1>New emergency!</h1>
+        <div className="alert__hero">
+          <div className="alert__icon"><span /><i className="bi bi-bell-fill" /></div>
+          <p className="alert__eyebrow">Incoming request</p>
+          <h1>New emergency</h1>
+        </div>
         <div className="alert__card">
-          <h2>{typeLabel}</h2>
-          <p><i className="bi bi-geo-alt-fill" /> {booking.pickup.address}</p>
-          {kmAway !== null && (
-            <p><i className="bi bi-signpost-fill" /> {kmAway.toFixed(1)} km away</p>
-          )}
-          <p>For: {booking.forWhom === 'me' ? 'The caller' : 'Someone else'}</p>
+          <span className="crew__tag">{typeLabel}</span>
+          <p className="alert__addr"><i className="bi bi-geo-alt-fill" /> {booking.pickup.address}</p>
+          <div className="alert__stats">
+            {kmAway !== null && (
+              <div><small>Distance</small><strong>{kmAway.toFixed(1)} km</strong></div>
+            )}
+            {kmAway !== null && (
+              <div><small>Est. time</small><strong>~{Math.max(1, Math.round((kmAway / 30) * 60))} min</strong></div>
+            )}
+            <div><small>Patient</small><strong>{booking.forWhom === 'me' ? 'Caller' : 'Someone else'}</strong></div>
+          </div>
         </div>
         <div className="alert__buttons">
                   <button
@@ -204,10 +273,10 @@ export default function Crew() {
             disabled={!network}
             onClick={() => setDeclined(booking.requestedAt)}
           >
-            Reject
+            <i className="bi bi-x-lg" /> Reject
           </button>
           <button className="alert__accept" disabled={!network} onClick={accept}>
-            Accept
+            <i className="bi bi-check-lg" /> Accept
           </button>
         </div>
       </div>
@@ -217,12 +286,19 @@ export default function Crew() {
   // ---------- 5. Trip complete ----------
   if (status === 'hospital') {
     return (
-      <div className="crew crew--center">
+      <div className="crew">
         {bar}
-        <div className="crew__done"><i className="bi bi-check-lg" /></div>
-        <h2>Trip complete</h2>
-        <p>Patient handed over at {booking.hospital}</p>
-       <button className="crew__big" disabled={!network || Boolean(queued)} onClick={completeBooking}>
+        <div className="crew__wait">
+          <div className="crew__done"><i className="bi bi-check-lg" /></div>
+          <h2>Trip complete</h2>
+          <p>Patient handed over at <b>{booking.hospital}</b></p>
+        </div>
+        <dl className="crew__facts">
+          <div><dt>Trip ID</dt><dd>{booking.tripId}</dd></div>
+          <div><dt>Emergency</dt><dd>{typeLabel}</dd></div>
+        </dl>
+        <div className="crew__spacer" />
+        <button className="crew__big crew__big--green" disabled={!network || Boolean(queued)} onClick={completeBooking}>
           {network && !queued ? 'Finish' : 'Waiting to sync…'}
         </button>
       </div>
@@ -236,20 +312,36 @@ export default function Crew() {
   return (
     <div className={`crew ${!network ? 'crew--offline' : ''}`}>
       {bar}
-      <h2 className="crew__title">Active trip</h2>
+      <div className="crew__titlebar">
+        <h2 className="crew__title">Active trip</h2>
+        {booking.tripId && <span>#{booking.tripId}</span>}
+      </div>
+      <div className="crew__progress"><TripProgress status={status} /></div>
 
       <div className="crew__card">
         <span className="crew__tag">{typeLabel}</span>
-        <p><i className="bi bi-geo-alt-fill" /> {booking.pickup.address}</p>
-        <p><i className="bi bi-pin-map-fill" /> Landmark:{booking.pickup.name}</p>
+        <div className="crew__line">
+          <i className="bi bi-geo-alt-fill" />
+          <div><small>Pick-up</small><p>{booking.pickup.address}</p></div>
+        </div>
+        <div className="crew__line">
+          <i className="bi bi-pin-map-fill" />
+          <div><small>Landmark</small><p>{booking.pickup.name}</p></div>
+        </div>
         {status === 'picked' && (
-          <p><i className="bi bi-hospital-fill" /> Hospital: {booking.hospital}</p>
+          <div className="crew__line">
+            <i className="bi bi-hospital-fill" />
+            <div><small>Hospital</small><p>{booking.hospital}</p></div>
+          </div>
         )}
         {condLabel && (
-          <p>
-            <i className="bi bi-activity" /> Condition: {condLabel}
-            {booking.bedNeeded ? ` · ${facilityLabels[booking.bedNeeded]} bed` : ''}
-          </p>
+          <div className="crew__line">
+            <i className="bi bi-activity" />
+            <div>
+              <small>Condition</small>
+              <p>{condLabel}{booking.bedNeeded ? ` · ${facilityLabels[booking.bedNeeded]} bed` : ''}</p>
+            </div>
+          </div>
         )}
       </div>
 
@@ -273,9 +365,11 @@ export default function Crew() {
       )}
 
       {action && (
-        <button className="crew__big crew__big--bottom" onClick={() => handleStatus(action.next)}>
-          {action.label}
-        </button>
+        <div className="crew__dock">
+          <button className="crew__big" onClick={() => handleStatus(action.next)}>
+            <i className={`bi ${action.next === 'reached' ? 'bi-person-check-fill' : 'bi-hospital-fill'}`} /> {action.label}
+          </button>
+        </div>
       )}
     </div>
   );

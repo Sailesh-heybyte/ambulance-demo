@@ -4,6 +4,7 @@ import { user } from '../../mock/user';
 import { tripKinds, scheduledPurposes, vehicleNeeds } from '../../mock/trips';
 import { addTrip } from '../../utils/trips';
 import './TripForm.scss';
+import PageHeader from '../../components/PageHeader';
 
 const today = () => new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
 
@@ -70,17 +71,10 @@ export default function TripForm({ kind, onBack, onSaved }) {
   };
 
   return (
-       <div className="tf">
-      <div className="tf__head">
-        <button className="tf__back" onClick={onBack}>
-          <i className="bi bi-chevron-left" />
-        </button>
-        <div className="tf__icon"><i className={`bi ${info.icon}`} /></div>
-        <div>
-          <h1>{info.title}</h1>
-          <p>{info.desc}</p>
-        </div>
-      </div>
+    <div className="tf">
+      <PageHeader title={info.title} sub={info.desc} onBack={onBack} />
+
+      <div className="tf__card">
 
       {isScheduled && (
         <>
@@ -168,10 +162,12 @@ export default function TripForm({ kind, onBack, onSaved }) {
       <label>Notes (optional)</label>
       <input value={f.notes} onChange={set('notes')} placeholder="Anything the driver should know" />
 
-      {error && <p className="tf__error">{error}</p>}
+      </div>
+
+      {error && <p className="tf__error"><i className="bi bi-exclamation-circle-fill" /> {error}</p>}
 
       <button className="tf__submit" onClick={submit}>
-        {later ? 'Book trip' : 'Request now'}
+        {later ? 'Book trip' : 'Request now'} <i className="bi bi-arrow-right" />
       </button>
     </div>
   );

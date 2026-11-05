@@ -1,31 +1,49 @@
-@use '../styles/colors' as *;
-
+// 4-step progress: thin bars with labels. Green = done, red = current step.
 .trip-progress {
   display: flex;
   gap: 6px;
-  margin: 14px 0 4px;
+  margin: 0;
 
   &__step {
     flex: 1;
+    min-width: 0;
 
     small {
       display: block;
-      margin-top: 6px;
+      margin-top: 7px;
       font-size: 11px;
-      color: $muted;
+      line-height: 1.25;
+      font-weight: 600;
+      color: #9CA3AF;
     }
 
-    &.is-done small { color: $green-dark; font-weight: 700; }
-    &.is-now small { color: $text; font-weight: 700; }
+    &.is-done small { color: #15803D; font-weight: 700; }
+    &.is-now small { color: #111827; font-weight: 800; }
   }
 
   &__bar {
     display: block;
-    height: 4px;
-    border-radius: 2px;
-    background: #e5e7eb;
+    height: 5px;
+    border-radius: 999px;
+    background: #ECEAE4;
+    position: relative;
+    overflow: hidden;
   }
 
-  &__step.is-done &__bar { background: $green; }
-  &__step.is-now &__bar { background: $blue; }
+  &__step.is-done &__bar { background: #16A34A; }
+  &__step.is-now &__bar {
+    background: #FAD4D4;
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      width: 55%;
+      border-radius: inherit;
+      background: #DC2626;
+      animation: tp-fill 1.6s ease-in-out infinite alternate;
+    }
+  }
 }
+
+@keyframes tp-fill { from { width: 25%; } to { width: 85%; } }
+@media (prefers-reduced-motion: reduce) { .trip-progress__bar::after { animation: none; } }

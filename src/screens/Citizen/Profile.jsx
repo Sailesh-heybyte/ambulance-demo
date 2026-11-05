@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { user as mockUser } from '../../mock/user';
 import { useAuth } from '../../context/AuthContext';
 import { getProfile, saveProfile, formatAbha } from '../../utils/profile';
+import ProtocolLeaders from '../../components/ProtocolLeaders';
 import './Profile.scss';
 
 export default function Profile() {
@@ -63,17 +64,37 @@ export default function Profile() {
 
   return (
     <div className="profile">
+      <div className="profile__top">
+        <ProtocolLeaders variant="ribbon" />
+      </div>
+
       <div className="profile__head">
         <div className="profile__avatar">{user.name.charAt(0)}</div>
-        <div>
+        <div className="profile__who">
           <h1>{user.name}</h1>
-          <p>Your health and emergency details</p>
+          {account?.phone && <p><i className="bi bi-telephone" /> +91 {account.phone}</p>}
+          <span className="profile__verified"><i className="bi bi-patch-check-fill" /> Verified citizen</span>
+        </div>
+      </div>
+
+      <div className="profile__stats">
+        <div>
+          <strong>{profile.abha ? 'Linked' : 'Not added'}</strong>
+          <small>ABHA ID</small>
+        </div>
+        <div>
+          <strong>{profile.contacts.length}/5</strong>
+          <small>Contacts</small>
+        </div>
+        <div>
+          <strong>{profile.aarogyasri ? 'Added' : 'Not added'}</strong>
+          <small>Aarogyasri</small>
         </div>
       </div>
 
       {/* ---------- Health IDs ---------- */}
       <section className="card">
-        <h2><i className="bi bi-card-heading" /> Health IDs</h2>
+        <h2><span><i className="bi bi-card-heading" /></span> Health IDs</h2>
 
         <label>ABHA number (Ayushman Bharat Health ID)</label>
         <input
@@ -103,13 +124,13 @@ export default function Profile() {
 
       {/* ---------- Emergency contacts ---------- */}
       <section className="card">
-        <h2><i className="bi bi-people-fill" /> Emergency contacts</h2>
+        <h2><span><i className="bi bi-people-fill" /></span> Emergency contacts</h2>
         <p className="card__note card__note--top">
           These people are notified automatically when you press SOS.
         </p>
 
         {profile.contacts.length === 0 && (
-          <p className="card__empty">No contacts added yet.</p>
+          <p className="card__empty"><i className="bi bi-person-plus" /> No contacts added yet.</p>
         )}
 
         {profile.contacts.map((c) => (
@@ -126,6 +147,7 @@ export default function Profile() {
         ))}
 
         <div className="add">
+          <p className="add__title">Add a contact</p>
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" />
           <input
             value={phone}
@@ -144,9 +166,10 @@ export default function Profile() {
           </button>
         </div>
       </section>
-            <button className="btn btn--light" onClick={logout}>
+      <button className="btn btn--out" onClick={logout}>
         <i className="bi bi-box-arrow-right" /> Log out
       </button>
+      <p className="profile__foot">108 Ambulance · Govt. of Andhra Pradesh</p>
     </div>
   );
 }

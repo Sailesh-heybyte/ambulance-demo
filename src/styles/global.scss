@@ -39,6 +39,10 @@ html, body {
   padding-bottom: 0;
 }
 
+.app-shell:not(.app-shell--full) {
+  background: #FBFAF7;
+}
+
 .map-pin {
   width: 40px;
   height: 40px;

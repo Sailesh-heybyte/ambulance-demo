@@ -1,48 +1,50 @@
-@use '../styles/colors' as *;
-@use '../styles/variables' as *;
-
+// Bottom tabs: white bar, every tab labelled, red for the current tab.
 .bottom-nav {
   position: fixed;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 50;
   width: 100%;
   max-width: 430px;
-  display: flex;
-  justify-content: space-around;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   align-items: center;
-    height: calc(var(--nav-h) + env(safe-area-inset-bottom));
-  padding: 0 16px env(safe-area-inset-bottom);
-  background: $white;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+  height: calc(var(--nav-h) + env(safe-area-inset-bottom));
+  padding: 0 8px env(safe-area-inset-bottom);
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #F1EFEA;
+  box-shadow: 0 -8px 24px -18px rgba(15, 23, 42, 0.25);
 
   &__item {
+    position: relative;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 6px;
-    padding: 10px 14px;
-    border-radius: $radius-sm;
-    color: $muted;
+    gap: 4px;
+    padding: 8px 4px;
+    color: #9CA3AF;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 11.5px;
     font-weight: 600;
+    transition: color 0.15s;
 
     i {
-      font-size: 20px;
-    }
-
-    // label is hidden unless the tab is active
-    span {
-      display: none;
+      width: 52px;
+      height: 30px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 19px;
+      transition: background 0.2s;
     }
 
     &.active {
-      background: $primary;
-      color: $white;
-
-      span {
-        display: inline;
-      }
+      color: #DC2626;
+      font-weight: 800;
+      i { background: #FDECEC; }
     }
   }
 }
