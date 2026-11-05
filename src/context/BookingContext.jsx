@@ -72,6 +72,7 @@ export function BookingProvider({ children }) {
         id: unit.id,
         station: unit.station,
         driver: unit.driver,
+                phone: unit.phone,
         number: unit.number,
         lat: unit.lat,
         lng: unit.lng,

@@ -4,7 +4,6 @@ import TrackingMap from './TrackingMap';
 import AmbulanceArt from '../../components/AmbulanceArt';
 import { useBooking } from '../../context/BookingContext';
 import { useDriverLocationAge, getCrewLocation } from '../../hooks/useGpsPublisher';
-import { getProfile } from '../../utils/profile';
 import { hospitals } from '../../mock/hospitals';
 import { fetchRoute } from '../../utils/route';
 import './Tracking.scss';
@@ -40,7 +39,7 @@ export default function Tracking() {
   const [step, setStep] = useState('confirmed'); // 'confirmed' or 'map'
   const [pickupIdx, setPickupIdx] = useState(0); // progress: station -> patient
   const [tripIdx, setTripIdx] = useState(0); // progress: patient -> hospital
-const [sharedIds, setSharedIds] = useState([]); // contacts already messaged
+
   // Until the real roads load, each route is a straight line
   const [toPatient, setToPatient] = useState({
     points: start && patient ? [start, patient] : [],
@@ -95,7 +94,7 @@ const [sharedIds, setSharedIds] = useState([]); // contacts already messaged
     const timer = setInterval(() => setTripIdx((i) => (i < STEPS ? i + 1 : i)), 2000);
     return () => clearInterval(timer);
   }, [step, status]);
-const [shareNote, setShareNote] = useState('');
+
   // No booking (cancelled, finished or old data): go back home
   if (!booking || !patient) return <Navigate to="/" replace />;
   // Which route and progress to show for the current status
@@ -119,13 +118,14 @@ const [shareNote, setShareNote] = useState('');
     hospital: 'Done',
   }[status];
 
-  const handleCall = () => {
-    alert('Connecting through a masked number. You and the driver will not see each other’s real number.');
+    const handleCall = () => {
+    if (!unit?.phone) {
+      alert('Driver number is not available.');
+      return;
+    }
+    window.location.href = `tel:+91${unit.phone}`;
   };
-
-  const handleMessage = () => {
-    alert('Message sent through the app. The driver will not see your number.');
-  };
+ 
 
     // Ambulance position: the driver's real GPS if it is fresh,
   // otherwise the spot on the route where the app shows it
@@ -140,18 +140,17 @@ const [shareNote, setShareNote] = useState('');
 
   const buildShareText = () => {
     const lines = [
-      `🚑 Emergency! I have requested an ambulance (Trip ${booking.tripId}).`,
+      `🚑 Emergency! An ambulance has been requested (Trip ${booking.tripId}).`,
       `Status: ${TITLES[status]}${etaText ? ` (${etaText})` : ''}`,
       `Ambulance ${unit.number}, driver ${unit.driver}`,
       `Ambulance location now: ${mapLink(ambulancePlace())}`,
-      `My pickup point (${spot.address}): ${mapLink(patient)}`,
+      `Pickup point (${spot.address}): ${mapLink(patient)}`,
     ];
     if (hospitalChosen) lines.push(`Going to: ${booking.hospital}`);
     return lines.join('\n');
   };
 
-  // The existing "Share" button: phone share sheet, or WhatsApp as a fallback
-   // Opens the phone's own share sheet (WhatsApp, Instagram, Mail, Messages...)
+  // Opens the phone's own share menu (WhatsApp, Instagram, Messages, Mail...)
   const handleShare = async () => {
     const text = buildShareText();
 
@@ -159,27 +158,15 @@ const [shareNote, setShareNote] = useState('');
       try {
         await navigator.share({ title: 'Ambulance on the way', text });
       } catch {
-        /* the person closed the share sheet */
+        /* the person closed the share menu */
       }
       return;
     }
 
-    // Browsers with no share sheet (most desktops): copy the message instead
-    try {
-      await navigator.clipboard.writeText(text);
-      setShareNote('Message copied. Paste it in any app.');
-    } catch {
-      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-    }
-  };
-
-  // One tap per contact: opens WhatsApp to that person's number
-  const shareWithContact = (c) => {
-    window.open(`https://wa.me/91${c.phone}?text=${encodeURIComponent(buildShareText())}`, '_blank');
-    setSharedIds((ids) => (ids.includes(c.id) ? ids : [...ids, c.id]));
-  };
-
-  const contacts = getProfile().contacts;
+    // Browsers with no share menu (most desktops): fall back to WhatsApp
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+   
+};
   const handleCancel = () => {
     clearBooking();
     navigate('/');
@@ -279,59 +266,11 @@ const [shareNote, setShareNote] = useState('');
           <button className="track__call" onClick={handleCall}>
             <i className="bi bi-telephone-fill" /> Call
           </button>
-          <button className="track__msg" onClick={handleMessage}>
-            <i className="bi bi-chat-dots-fill" /> Message
-          </button>
           <button className="track__share" onClick={handleShare}>
             <i className="bi bi-share-fill" /> Share
           </button>
         </div>
-                {booking.forWhom === 'me' && (
-          <div className="share">
-            <h4 className="share__title">
-              <i className="bi bi-people-fill" /> Share with family &amp; friends
-            </h4>
-            <p className="share__hint">
-              Choose any app: WhatsApp, Instagram, Messages, Mail and more.
-            </p>
-
-            <button className="share__main" onClick={handleShare}>
-              <i className="bi bi-share-fill" /> Share ambulance location
-            </button>
-            {shareNote && <p className="share__note">{shareNote}</p>}
-
-            {contacts.length > 0 ? (
-              <>
-                <p className="share__or">or send directly to</p>
-                <div className="share__list">
-                  {contacts.map((c) => {
-                    const sent = sharedIds.includes(c.id);
-                    return (
-                      <button key={c.id} className="share__row" onClick={() => shareWithContact(c)}>
-                        <span className="share__avatar">{c.name.charAt(0)}</span>
-                        <span className="share__who">
-                          <strong>{c.name}</strong>
-                          <small>{c.relation || c.phone}</small>
-                        </span>
-                        <span className={`share__send ${sent ? 'is-sent' : ''}`}>
-                          {sent ? (
-                            <><i className="bi bi-check2" /> Sent</>
-                          ) : (
-                            <><i className="bi bi-whatsapp" /> Send</>
-                          )}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </>
-            ) : (
-              <button className="share__add" onClick={() => navigate('/profile')}>
-                <i className="bi bi-person-plus-fill" /> Add emergency contacts
-              </button>
-            )}
-          </div>
-        )} 
+              
         <button
           className="track__aid"
           onClick={() => navigate('/first-aid', { state: { id: booking.type } })}

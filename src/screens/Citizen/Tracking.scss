@@ -180,7 +180,6 @@
   }
 
   &__call,
-  &__msg,
   &__share {
     flex: 1;
     padding: 13px 6px;
@@ -190,7 +189,6 @@
   }
 
   &__call { background: $primary; color: $white; }
-  &__msg { background: #eceef2; color: $text; }
   &__share { background: $primary-light; color: $primary; }
   &__aid {
     width: 100%;
@@ -229,100 +227,4 @@
 .tracking-map {
   position: absolute;
   inset: 0;
-}
-.share {
-  margin-top: 14px;
-  padding: 12px;
-  border-radius: $radius-md;
-  background: $background;
-  &__main {
-    width: 100%;
-    padding: 13px;
-    border-radius: $radius-md;
-    background: $primary;
-    color: $white;
-    font-size: 14px;
-    font-weight: 700;
-
-    i { margin-right: 6px; }
-  }
-
-  &__note {
-    margin: 8px 0 0;
-    font-size: 12px;
-    color: $green-dark;
-    text-align: center;
-  }
-
-  &__or {
-    margin: 12px 0 8px;
-    font-size: 12px;
-    color: $muted;
-    text-align: center;
-  }
-  &__title {
-    margin: 0;
-    font-size: 14px;
-    i { color: $primary; margin-right: 4px; }
-  }
-
-  &__hint {
-    margin: 4px 0 10px;
-    font-size: 12px;
-    color: $muted;
-  }
-
-  &__list { display: flex; flex-direction: column; gap: 8px; }
-
-  &__row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    padding: 8px 10px;
-    border-radius: $radius-sm;
-    background: $white;
-    text-align: left;
-  }
-
-  &__avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: $primary-light;
-    color: $primary;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-  }
-
-  &__who {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    strong { font-size: 14px; }
-    small { font-size: 12px; color: $muted; }
-  }
-
-  &__send {
-    padding: 7px 12px;
-    border-radius: 20px;
-    background: $green;
-    color: $white;
-    font-size: 12px;
-    font-weight: 700;
-
-    &.is-sent { background: $green-light; color: $green-dark; }
-  }
-
-  &__add {
-    width: 100%;
-    padding: 11px;
-    border-radius: $radius-md;
-    background: $primary-light;
-    color: $primary;
-    font-size: 13px;
-    font-weight: 700;
-  }
 }
