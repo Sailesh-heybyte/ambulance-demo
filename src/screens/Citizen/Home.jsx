@@ -45,7 +45,7 @@ export default function Home() {
     <div className="home-screen">
       {/* --- Top Official Protocol Leadership Ribbon --- */}
       <div className="home-screen__protocol-wrapper">
-        <ProtocolLeaders variant="ribbon" size="sm" />
+        <ProtocolLeaders variant="ribbon" size="lg" />
       </div>
 
       {/* --- Top App Bar (108 Ambulance + Language + Menu) --- */}

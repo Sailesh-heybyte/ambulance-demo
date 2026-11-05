@@ -2,6 +2,13 @@ import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
+// Free OpenStreetMap tiles – no API key needed.
+// (CARTO tiles now need an API key, which is why the map showed "API KEY REQUIRED".)
+// The tiles are shown slightly muted (see .tracking-map in Tracking.scss) so the red route stands out.
+const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+const ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors';
+
 const makeIcon = (cls, icon) =>
   L.divIcon({
     className: '',
@@ -28,23 +35,8 @@ export default function TrackingMap({ path, progress, hospital, patient }) {
     });
     mapRef.current = map;
 
-    // CartoDB Voyager Bright Tiles (Modern, clean, bright streets with zero clutter)
-    const primaryTiles = L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-      {
-        subdomains: 'abcd',
-        maxZoom: 20,
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noreferrer">CARTO</a>',
-      }
-    );
-
-    // Fallback in case of tile network failure
-    primaryTiles.on('tileerror', () => {
-      console.warn('Primary tiles failed to load a tile.');
-    });
-
-    primaryTiles.addTo(map);
+    // Base map (no API key)
+    L.tileLayer(TILE_URL, { maxZoom: 19, attribution: ATTRIBUTION }).addTo(map);
 
     lineRef.current = L.polyline(path || [], {
       color: '#e8474c',

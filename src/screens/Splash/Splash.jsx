@@ -16,7 +16,7 @@ export default function Splash() {
       </div>
 
       <div className="splash__protocol">
-        <ProtocolLeaders variant="banner" size="md" />
+        <ProtocolLeaders variant="banner" size="lg" />
       </div>
     </div>
   );

@@ -189,9 +189,12 @@ export default function Tracking() {
   if (!unit) {
     return (
       <div className="confirmed">
-        <button className="confirmed__back" onClick={handleCancel}>
-          <i className="bi bi-chevron-left" />
-        </button>
+        <div className="confirmed__topbar">
+          <button className="confirmed__back" onClick={handleCancel} aria-label="Back">
+            <i className="bi bi-chevron-left" />
+          </button>
+          <ProtocolLeaders variant="corner" size="xl" />
+        </div>
 
         <div className="confirmed__art">
           <AmbulanceArt />
@@ -205,8 +208,6 @@ export default function Tracking() {
           </p>
         </div>
 
-        {/* State Emergency Protocol Assurance Card */}
-        <ProtocolLeaders variant="card" size="md" />
 
         <div className="confirmed__actions">
           <button className="confirmed__primary" disabled>

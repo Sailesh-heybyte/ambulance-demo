@@ -26,6 +26,7 @@ export default function ProtocolLeaders({
   showBadge = true,
   className = '',
 }) {
+  const showSub = variant === 'ribbon';
   return (
     <div className={`protocol-leaders protocol-leaders--${variant} protocol-leaders--${size} ${className}`}>
       {/* State Insignia / Title */}
@@ -38,7 +39,10 @@ export default function ProtocolLeaders({
             />
             <path d="M11 7h2v4h4v2h-4v4h-2v-4H7v-2h4V7z" fill="#FFFFFF" />
           </svg>
-          <span className="protocol-leaders__title">Govt. of Andhra Pradesh</span>
+          <span className="protocol-leaders__titles">
+            <span className="protocol-leaders__title">Govt. of Andhra Pradesh</span>
+            {showSub && <span className="protocol-leaders__dept">Health &amp; Family Welfare Dept.</span>}
+          </span>
         </div>
       )}
 
