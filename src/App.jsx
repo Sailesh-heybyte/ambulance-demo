@@ -43,7 +43,7 @@ function Layout() {
     );
   }
 
-  const fullScreen = pathname === '/tracking';
+  const fullScreen = pathname === '/tracking' || pathname === '/';
 
   return (
     <div className={`app-shell ${fullScreen ? 'app-shell--full' : ''}`}>

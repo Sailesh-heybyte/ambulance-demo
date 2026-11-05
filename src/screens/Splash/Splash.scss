@@ -19,17 +19,25 @@
     }
   }
 
+  &__content {
+    animation: splash-fade 0.6s ease-out 0.7s both;
+  }
+
+  &__protocol {
+    margin-top: 36px;
+    width: 90%;
+    animation: splash-fade 0.6s ease-out 1s both;
+  }
+
   h1 {
     margin: 8px 0 4px;
     font-size: 30px;
-    animation: splash-fade 0.6s ease-out 0.7s both;
   }
 
   p {
     margin: 0;
     opacity: 0.85;
     font-size: 15px;
-    animation: splash-fade 0.6s ease-out 0.9s both;
   }
 }
 

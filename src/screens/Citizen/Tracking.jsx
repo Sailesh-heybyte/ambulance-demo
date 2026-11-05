@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import TrackingMap from './TrackingMap';
 import AmbulanceArt from '../../components/AmbulanceArt';
+import ProtocolLeaders from '../../components/ProtocolLeaders';
 import { useBooking } from '../../context/BookingContext';
 import { useDriverLocationAge, getCrewLocation } from '../../hooks/useGpsPublisher';
 import { hospitals } from '../../mock/hospitals';
@@ -36,9 +37,16 @@ export default function Tracking() {
   const patient = spot ? [spot.lat, spot.lng] : null;
   const hospitalPos = hospital ? [hospital.lat, hospital.lng] : null;
 
-  const [step, setStep] = useState('confirmed'); // 'confirmed' or 'map'
+  const [step, setStep] = useState(unit ? 'map' : 'confirmed'); // 'confirmed' or 'map'
   const [pickupIdx, setPickupIdx] = useState(0); // progress: station -> patient
   const [tripIdx, setTripIdx] = useState(0); // progress: patient -> hospital
+
+  // Automatically transition directly to the live map as soon as a driver accepts
+  useEffect(() => {
+    if (unit || status === 'accepted') {
+      setStep('map');
+    }
+  }, [unit, status]);
 
   // Until the real roads load, each route is a straight line
   const [toPatient, setToPatient] = useState({
@@ -176,8 +184,9 @@ export default function Tracking() {
     completeBooking();
     navigate('/');
   };
-   // No driver yet? Stay on this screen and show no driver details.
-  if (step === 'confirmed' || !unit) {
+   // While waiting for a driver, show the searching screen.
+  // As soon as a driver accepts (unit is assigned), automatically show the live map.
+  if (!unit) {
     return (
       <div className="confirmed">
         <button className="confirmed__back" onClick={handleCancel}>
@@ -185,23 +194,23 @@ export default function Tracking() {
         </button>
 
         <div className="confirmed__art">
-        <AmbulanceArt />
+          <AmbulanceArt />
         </div>
 
         <div className="confirmed__text">
-                   <h1>
-            {unit ? 'Ambulance and responders are on a way' : 'Looking for the nearest ambulance'}
-          </h1>
+          <h1>Looking for the nearest ambulance</h1>
           <p>
-            {unit
-              ? 'Stay calm and speak gently to the patient until help arrives. The nearest ambulance has been alerted.'
-              : 'Your request has been sent to all ambulances on duty. Stay calm and speak gently to the patient. Driver details will appear here as soon as a driver accepts.'}
+            Your request has been sent to all ambulances on duty. Stay calm and speak gently to the patient.
+            Live GPS tracking will begin immediately when a driver accepts.
           </p>
         </div>
 
+        {/* State Emergency Protocol Assurance Card */}
+        <ProtocolLeaders variant="card" size="md" />
+
         <div className="confirmed__actions">
-                   <button className="confirmed__primary" disabled={!unit} onClick={() => setStep('map')}>
-            {unit ? 'See responders on map' : 'Waiting for a driver…'}
+          <button className="confirmed__primary" disabled>
+            Searching for nearby responders…
           </button>
           <button className="confirmed__link" onClick={handleCancel}>
             Cancel request
@@ -221,7 +230,7 @@ export default function Tracking() {
         hospital={hospitalChosen && hospital ? { name: hospital.name, position: hospitalPos } : null}
       />
 
-      <button className="track__back" onClick={() => setStep('confirmed')}>
+      <button className="track__back" onClick={() => navigate('/')}>
         <i className="bi bi-chevron-left" />
       </button>
 

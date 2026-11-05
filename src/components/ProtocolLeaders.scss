@@ -1,0 +1,157 @@
+.protocol-leaders {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+
+  // --- Variant: Ribbon (Used in Home Header) ---
+  &--ribbon {
+    width: 100%;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 999px;
+    padding: 4px 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    gap: 8px;
+  }
+
+  // --- Variant: Banner (Used in Splash Screen) ---
+  &--banner {
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(8px);
+    border-radius: 20px;
+    color: #FFFFFF;
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto;
+
+    .protocol-leaders__badge {
+      color: #FFFFFF;
+    }
+  }
+
+  // --- Variant: Card (Used in Dispatch Waiting View) ---
+  &--card {
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 16px;
+    background: #FFFFFF;
+    border: 1px solid #F1F5F9;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 330px;
+    margin: 12px auto 0;
+    color: #1E293B;
+  }
+
+  // State Insignia / Title
+  &__badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #334155;
+    letter-spacing: -0.2px;
+  }
+
+  &__emblem {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+  }
+
+  // Avatar Cluster
+  &__avatars {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  &__avatar-wrap {
+    position: relative;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #FFFFFF;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    border: 1.5px solid #FFFFFF;
+    outline: 1px solid rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.15);
+      z-index: 5;
+    }
+  }
+
+  // Sizes
+  &--sm &__avatar-wrap {
+    width: 32px;
+    height: 32px;
+  }
+
+  &--md &__avatar-wrap {
+    width: 38px;
+    height: 38px;
+  }
+
+  &--lg &__avatar-wrap {
+    width: 46px;
+    height: 46px;
+  }
+
+  // Image Frame with scale control
+  &__img-frame {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F8FAFC;
+  }
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%;
+  }
+
+  // Fallback initial badges
+  &__fallback {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+  }
+
+  &__info {
+    text-align: center;
+  }
+
+  &__subtitle {
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.9;
+    letter-spacing: 0.1px;
+  }
+}
+

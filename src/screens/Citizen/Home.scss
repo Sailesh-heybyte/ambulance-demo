@@ -1,168 +1,390 @@
 @use '../../styles/colors' as *;
 @use '../../styles/variables' as *;
-.home {
-  padding: 12px 20px 24px;
 
-  &__header {
+.home-screen {
+  min-height: 100dvh;
+  padding: 12px 20px 0;
+  background: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  overflow-x: hidden;
+
+  // --- Top Official Protocol Badges Strip ---
+  &__protocol-wrapper {
+    margin-bottom: 14px;
+  }
+
+  // --- Top App Bar ---
+  &__navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 14px 12px 18px;
-    border-radius: 18px;
-    background: $primary-light;
+    margin-bottom: 18px;
   }
 
-  &__welcome {
-    margin: 0;
-    font-size: 12px;
-    color: $muted;
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 
-  &__name {
-    margin: 2px 0 0;
-    font-size: 17px;
-    font-weight: 700;
-    text-transform: capitalize;
-  }
-
-  &__avatar {
-    width: 42px;
-    height: 42px;
-    padding: 0;
-    border-radius: 50%;
-    background: $primary;
-    color: $white;
+  &__cross-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: #DC2626;
+    color: #FFFFFF;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 17px;
-    font-weight: 700;
-    text-transform: uppercase;
-    box-shadow: 0 4px 10px rgba(232, 71, 76, 0.35);
+    font-size: 20px;
+    font-weight: 900;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
   }
 
-
-  &__main {
-    text-align: center;
-    margin-top: 36px;
-
-    h1 {
-      font-size: 24px;
-      margin: 0 0 8px;
-    }
-
-    p {
-      margin: 0 auto;
-      max-width: 240px;
-      font-size: 13px;
-      color: $muted;
-    }
-  }
-}
-
-// ---- SOS button with pulsing rings ----
-.sos {
-  position: relative;
-  width: 260px;
-  height: 260px;
-  margin: 40px auto 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &__ring {
-    position: absolute;
-    border-radius: 50%;
-    background: $primary-light;
-    animation: pulse 2.4s ease-in-out infinite;
-
-    &--outer {
-      width: 260px;
-      height: 260px;
-      opacity: 0.5;
-    }
-
-    &--inner {
-      width: 210px;
-      height: 210px;
-      opacity: 0.8;
-      animation-delay: 0.4s;
-    }
-  }
-
-  &__button {
-    position: relative;
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
-    background: $primary;
-    color: $white;
-    font-size: 32px;
+  &__brand-name {
+    font-size: 19px;
     font-weight: 800;
-    letter-spacing: 1px;
-    box-shadow: $shadow-red;
-
-    &:active {
-      transform: scale(0.96);
-    }
+    color: #111827;
+    letter-spacing: -0.4px;
   }
-}
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.06); }
-}
-
-// ---- Address card ----
-.address-card {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-top: 36px;
-  padding: 16px;
-  border-radius: $radius-md;
-  background: $white;
-  box-shadow: $shadow-card;
-
-  &__icon {
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: $primary-light;
-    color: $primary;
+  &__nav-actions {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 18px;
+    gap: 8px;
   }
 
-  h4 {
-    margin: 0 0 2px;
-    font-size: 14px;
-  }
-
-  p {
-    margin: 0;
-    font-size: 12px;
-    color: $muted;
-    line-height: 1.4;
-  }
-}
-.address-card {
-  width: 100%;
-  text-align: left;
-  color: $text;
-
-  &__text { flex: 1; }
-
-  &__change {
-    color: $primary;
+  &__lang-btn {
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: 1.5px solid #E2E8F0;
+    background: #FFFFFF;
+    color: #1E293B;
     font-size: 13px;
     font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #F8FAFC;
+      border-color: #CBD5E1;
+    }
+  }
+
+  &__menu-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid #E2E8F0;
+    background: #FFFFFF;
+    color: #1E293B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #F8FAFC;
+      border-color: #CBD5E1;
+    }
+  }
+
+  // --- Greeting Section ---
+  &__greeting-section {
+    margin-bottom: 18px;
+  }
+
+  &__salutation {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #4B5563;
+    letter-spacing: -0.2px;
+  }
+
+  &__user-name {
+    margin: 2px 0 10px;
+    font-size: 38px;
+    font-weight: 900;
+    color: #111827;
+    letter-spacing: -1px;
+    line-height: 1.1;
+  }
+
+  &__location-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    border-radius: 999px;
+    background: #F3F4F6;
+    border: none;
+    cursor: pointer;
+    max-width: 100%;
+    transition: background 0.2s ease, transform 0.15s ease;
+
+    &:hover {
+      background: #E5E7EB;
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  &__location-pin {
+    color: #DC2626;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  &__location-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // --- Main Red Emergency Card (Fills completely to the bottom edge) ---
+  &__emergency-card {
+    flex: 1;
+    margin: 0 -20px 0; // Negative margin to flush with app-shell edges
+    background: linear-gradient(180deg, #E53935 0%, #DC2626 100%);
+    border-radius: 38px 38px 0 0;
+    padding: 28px 24px calc(24px + env(safe-area-inset-bottom));
+    color: #FFFFFF;
+    box-shadow: 0 -10px 36px rgba(220, 38, 38, 0.25);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  // Pulsing Concentric Rings (Centered mathematically around the white button)
+  &__pulse-container {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px auto 14px;
+    flex-shrink: 0;
+  }
+
+  &__pulse-ring {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    border-radius: 50%;
+    pointer-events: none;
+    transform-origin: center center;
+
+    &--outer {
+      width: 246px;
+      height: 246px;
+      background: rgba(255, 255, 255, 0.14);
+      animation: pulseWave 2.8s ease-out infinite;
+    }
+
+    &--mid {
+      width: 204px;
+      height: 204px;
+      background: rgba(255, 255, 255, 0.2);
+      animation: pulseWave 2.8s ease-out 0.6s infinite;
+    }
+  }
+
+  // Elevated White Circular Button
+  &__sos-button {
+    width: 168px;
+    height: 168px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      transform: scale(1.03);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
+    }
+
+    &:active {
+      transform: scale(0.95);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    // Active 'Ambulance requested' state styling (Image 2)
+    &--requested {
+      padding: 12px;
+    }
+  }
+
+  // Idle SOS state labels (Optically centered)
+  &__sos-label {
+    font-size: 52px;
+    font-weight: 900;
+    line-height: 0.95;
+    color: #DC2626;
+    letter-spacing: -1px;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__sos-sublabel {
+    margin-top: 6px;
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #111827;
+    letter-spacing: 0.2px;
+    line-height: 1;
+  }
+
+  // Active requested state labels (Image 2)
+  &__status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #DC2626;
+    margin-bottom: 6px;
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.7);
+    animation: dotPulse 1.6s infinite ease-in-out;
+  }
+
+  &__requested-title {
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1.15;
+    color: #111827;
+    text-align: center;
+    letter-spacing: -0.4px;
+    margin-bottom: 6px;
+  }
+
+  &__view-link {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #DC2626;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+
+    i {
+      font-size: 11px;
+    }
+  }
+
+  // Card Text
+  &__card-info {
+    margin-bottom: auto;
+    padding: 8px 0 16px;
+  }
+
+  &__card-heading {
+    margin: 0 0 6px;
+    font-size: 23px;
+    font-weight: 800;
+    color: #FFFFFF;
+    letter-spacing: -0.3px;
+  }
+
+  &__card-subheading {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    letter-spacing: 0.2px;
+  }
+
+  // Dual Black Action Pills
+  &__action-row {
+    display: flex;
+    width: 100%;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 14px;
+  }
+
+  &__action-pill {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #111827;
+    color: #FFFFFF;
+    text-decoration: none;
+    border: none;
+    border-radius: 999px;
+    padding: 15px 16px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      background: #000000;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+
+    i {
+      font-size: 14px;
+    }
   }
 }
 
+// Wave & Dot Animations
+@keyframes pulseWave {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.35;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+@keyframes dotPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.6;
+  }
+}
+
+// --- Pickup Spots Selector ---
 .spots {
   display: flex;
   flex-direction: column;
@@ -180,12 +402,129 @@
     color: $text;
     font-size: 14px;
     font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
 
-    i { color: $primary; }
+    i {
+      color: #DC2626;
+      font-size: 16px;
+    }
 
     &--active {
-      background: $primary-light;
-      border-color: $primary;
+      background: #FEE2E2;
+      border-color: #DC2626;
+      color: #991B1B;
+    }
+
+    &:hover {
+      border-color: #DC2626;
+    }
+  }
+}
+
+// --- More Services Modal Grid ---
+.services-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .service-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 16px;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #FFFFFF;
+      border-color: #CBD5E1;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transform: translateY(-1px);
+    }
+
+    &__icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+
+      &--red {
+        background: #FEE2E2;
+        color: #DC2626;
+      }
+      &--blue {
+        background: #E0F2FE;
+        color: #0284C7;
+      }
+      &--green {
+        background: #DCFCE7;
+        color: #16A34A;
+      }
+    }
+
+    h4 {
+      margin: 0 0 2px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1E293B;
+    }
+
+    p {
+      margin: 0;
+      font-size: 12.5px;
+      color: #64748B;
+      line-height: 1.4;
+    }
+  }
+}
+
+// --- Quick Menu List ---
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: transparent;
+    border: none;
+    text-align: left;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1E293B;
+    cursor: pointer;
+    transition: background 0.2s ease;
+
+    i {
+      font-size: 18px;
+      color: #64748B;
+    }
+
+    &:hover {
+      background: #F1F5F9;
+    }
+
+    &--danger {
+      color: #DC2626;
+      margin-top: 6px;
+      border-top: 1px solid #F1F5F9;
+      border-radius: 0 0 14px 14px;
+
+      i {
+        color: #DC2626;
+      }
     }
   }
 }
