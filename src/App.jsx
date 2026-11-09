@@ -43,7 +43,8 @@ function Layout() {
     );
   }
 
-  const fullScreen = pathname === '/tracking' || pathname === '/';
+  // Home now scrolls and shows the bottom tabs; only live tracking is full screen
+  const fullScreen = pathname === '/tracking';
 
   return (
     <div className={`app-shell ${fullScreen ? 'app-shell--full' : ''}`}>

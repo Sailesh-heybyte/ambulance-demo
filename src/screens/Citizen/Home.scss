@@ -1,387 +1,429 @@
 @use '../../styles/colors' as *;
 @use '../../styles/variables' as *;
 
-.home-screen {
+// Citizen Home: live ambulance map on top, booking card, then service info
+.ahome {
   min-height: 100dvh;
-  padding: 12px 20px 0;
-  background: #FFFFFF;
-  display: flex;
-  flex-direction: column;
-  user-select: none;
+  background: #FBFAF7;
+  padding-bottom: 24px;
   overflow-x: hidden;
 
-  // --- Top Official Protocol Badges Strip ---
-  &__protocol-wrapper {
+  // ---------- header ----------
+  &__head {
+    padding: calc(10px + env(safe-area-inset-top)) 20px 14px;
+    background: #fff;
+  }
+
+  &__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
     margin-bottom: 14px;
   }
 
-  // --- Top App Bar ---
-  &__navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
-  }
-
   &__brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    padding: 0;
+    background: none;
+    text-align: left;
   }
 
-  &__cross-badge {
-    width: 38px;
-    height: 38px;
-    border-radius: 12px;
-    background: #DC2626;
-    color: #FFFFFF;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    font-weight: 900;
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-  }
-
-  &__brand-name {
-    font-size: 19px;
-    font-weight: 800;
-    color: #111827;
-    letter-spacing: -0.4px;
-  }
-
-  &__nav-actions {
+  &__actions {
     display: flex;
     align-items: center;
     gap: 8px;
   }
 
-  &__lang-btn {
-    padding: 6px 16px;
+  &__lang {
+    padding: 7px 14px;
     border-radius: 999px;
     border: 1.5px solid #E2E8F0;
-    background: #FFFFFF;
+    background: #fff;
     color: #1E293B;
     font-size: 13px;
     font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: #F8FAFC;
-      border-color: #CBD5E1;
-    }
   }
 
-  &__menu-btn {
+  &__icon-btn {
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    border: 1.5px solid #E2E8F0;
-    background: #FFFFFF;
-    color: #1E293B;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: #F8FAFC;
-      border-color: #CBD5E1;
-    }
+    background: #111827;
+    color: #fff;
+    font-size: 17px;
+    display: grid;
+    place-items: center;
   }
 
-  // --- Greeting Section ---
-  &__greeting-section {
-    margin-bottom: 18px;
-  }
-
-  &__salutation {
+  &__eta-label {
     margin: 0;
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 700;
     color: #4B5563;
-    letter-spacing: -0.2px;
   }
 
-  &__user-name {
-    margin: 2px 0 10px;
-    font-size: 38px;
+  &__eta {
+    margin: 0 0 6px;
+    font-size: 36px;
     font-weight: 900;
-    color: #111827;
     letter-spacing: -1px;
     line-height: 1.1;
+    color: #DC2626;
+
+    &--muted { font-size: 24px; color: #111827; letter-spacing: -0.5px; }
   }
 
-  &__location-chip {
+  &__address {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 7px 16px;
-    border-radius: 999px;
-    background: #F3F4F6;
-    border: none;
-    cursor: pointer;
+    gap: 6px;
     max-width: 100%;
-    transition: background 0.2s ease, transform 0.15s ease;
+    padding: 0;
+    background: none;
+    color: #111827;
+    font-size: 16px;
+    font-weight: 700;
 
-    &:hover {
-      background: #E5E7EB;
-    }
-
-    &:active {
-      transform: scale(0.98);
-    }
+    span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    i { font-size: 12px; color: #DC2626; }
   }
 
-  &__location-pin {
-    color: #DC2626;
-    font-size: 14px;
-    flex-shrink: 0;
+  // ---------- map ----------
+  &__map {
+    position: relative;
+    height: clamp(300px, 46dvh, 440px);
   }
 
-  &__location-text {
+  &__live {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #fff;
+    color: #111827;
+    font-size: 12px;
+    font-weight: 800;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14);
+  }
+
+  &__live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #16A34A;
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.6);
+    animation: ahome-ping 1.8s infinite;
+  }
+
+  // ---------- request card ----------
+  &__request {
+    position: relative;
+    z-index: 3;
+    margin: -30px 16px 0;
+    padding: 18px 18px 16px;
+    border-radius: 24px;
+    background: #fff;
+    text-align: center;
+    box-shadow: 0 16px 36px -18px rgba(15, 23, 42, 0.35);
+  }
+
+  &__cta {
+    width: 100%;
+    height: 60px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #E53935 0%, #DC2626 100%);
+    color: #fff;
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+    box-shadow: 0 12px 26px -12px rgba(220, 38, 38, 0.75);
+    transition: transform 0.15s ease;
+
+    &:active { transform: scale(0.98); }
+  }
+
+  &__booked {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: #FEF2F2;
+    border: 1.5px solid #FECACA;
+    text-align: left;
+    color: #991B1B;
+
+    span:nth-child(2) { flex: 1; display: flex; flex-direction: column; }
+    strong { font-size: 16px; }
+    small { font-size: 12.5px; color: #B91C1C; }
+  }
+
+  &__booked-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #DC2626;
+    animation: ahome-ping-red 1.6s infinite;
+  }
+
+  &__free {
+    margin: 14px 0 2px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+
+    b { color: #16A34A; font-weight: 900; letter-spacing: 0.3px; }
+  }
+
+  &__free-sub {
+    margin: 0;
+    font-size: 13px;
+    color: #6B7280;
+  }
+
+  &__call {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
     font-size: 13px;
     font-weight: 700;
-    color: #374151;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: #DC2626;
+    text-decoration: none;
+    border-bottom: 1.5px dashed #FCA5A5;
   }
 
-  // --- Main Red Emergency Card (Fills completely to the bottom edge) ---
-  &__emergency-card {
-    flex: 1;
-    margin: 0 -20px 0; // Negative margin to flush with app-shell edges
-    background: linear-gradient(180deg, #E53935 0%, #DC2626 100%);
-    border-radius: 38px 38px 0 0;
-    padding: 28px 24px calc(24px + env(safe-area-inset-bottom));
-    color: #FFFFFF;
-    box-shadow: 0 -10px 36px rgba(220, 38, 38, 0.25);
+  // ---------- horizontal tiles ----------
+  &__section {
+    margin-top: 28px;
+
+    h2 {
+      margin: 0 20px 12px;
+      font-size: 21px;
+      font-weight: 900;
+      letter-spacing: -0.4px;
+      color: #111827;
+    }
+  }
+
+  &__row {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 2px 20px 8px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  // ---------- stats ----------
+  &__stats {
+    margin: 32px 16px 0;
+    padding: 28px 16px 18px;
+    border-radius: 24px;
+    background: linear-gradient(180deg, #FFF5F5 0%, #FFFFFF 100%);
+    border: 1px solid #FDE2E2;
     text-align: center;
-    position: relative;
-    overflow: hidden;
   }
 
-  // Pulsing Concentric Rings (Centered mathematically around the white button)
-  &__pulse-container {
-    position: relative;
-    width: 250px;
-    height: 250px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 10px auto 14px;
-    flex-shrink: 0;
-  }
-
-  &__pulse-ring {
-    position: absolute;
-    inset: 0;
-    margin: auto;
-    border-radius: 50%;
-    pointer-events: none;
-    transform-origin: center center;
-
-    &--outer {
-      width: 246px;
-      height: 246px;
-      background: rgba(255, 255, 255, 0.14);
-      animation: pulseWave 2.8s ease-out infinite;
-    }
-
-    &--mid {
-      width: 204px;
-      height: 204px;
-      background: rgba(255, 255, 255, 0.2);
-      animation: pulseWave 2.8s ease-out 0.6s infinite;
-    }
-  }
-
-  // Elevated White Circular Button
-  &__sos-button {
-    width: 168px;
-    height: 168px;
-    border-radius: 50%;
-    background: #FFFFFF;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    z-index: 2;
-    padding: 0;
+  &__stats-num {
     margin: 0;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-
-    &:hover {
-      transform: scale(1.03);
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
-    }
-
-    &:active {
-      transform: scale(0.95);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-    }
-
-    // Active 'Ambulance requested' state styling (Image 2)
-    &--requested {
-      padding: 12px;
-    }
-  }
-
-  // Idle SOS state labels (Optically centered)
-  &__sos-label {
     font-size: 52px;
     font-weight: 900;
-    line-height: 0.95;
+    letter-spacing: -2px;
+    line-height: 1;
     color: #DC2626;
-    letter-spacing: -1px;
-    margin: 0;
-    padding: 0;
   }
 
-  &__sos-sublabel {
-    margin-top: 6px;
-    font-size: 13.5px;
-    font-weight: 800;
+  &__stats-title {
+    margin: 10px 0 2px;
+    font-size: 17px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
     color: #111827;
-    letter-spacing: 0.2px;
+  }
+
+  &__stats-area {
+    margin: 0 0 18px;
+    font-size: 13px;
+    color: #6B7280;
+  }
+
+  &__stat-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  &__stat {
+    padding: 14px 6px;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 4px 14px -8px rgba(15, 23, 42, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    b { font-size: 22px; font-weight: 900; color: #111827; }
+    span { font-size: 12px; font-weight: 600; line-height: 1.3; color: #4B5563; }
+  }
+
+  // ---------- crew ----------
+  &__crew { margin-top: 28px; }
+
+  &__art {
+    width: 72%;
+    margin: 0 auto -18px;
+  }
+
+  &__crew-card {
+    margin: 0 16px;
+    padding: 20px 18px 6px;
+    border-radius: 24px;
+    background: #fff;
+    box-shadow: 0 16px 36px -22px rgba(15, 23, 42, 0.35);
+
+    h2 {
+      margin: 0;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.4px;
+      color: #111827;
+    }
+  }
+
+  &__crew-sub {
+    margin: 4px 0 8px;
+    text-align: center;
+    font-size: 13px;
+    color: #6B7280;
+  }
+
+  &__member {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+
+    & + & { border-top: 1px solid #F1EFEA; }
+
+    span:last-child { display: flex; flex-direction: column; gap: 2px; }
+    strong { font-size: 16px; font-weight: 800; color: #111827; }
+    small { font-size: 13px; color: #4B5563; }
+  }
+
+  &__avatar {
+    position: relative;
+    width: 54px;
+    height: 54px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #FDECEC;
+    color: #DC2626;
+    font-size: 22px;
+    display: grid;
+    place-items: center;
+  }
+
+  &__verified {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    font-size: 18px;
+    color: #1A56C8;
+    background: #fff;
+    border-radius: 50%;
     line-height: 1;
   }
 
-  // Active requested state labels (Image 2)
-  &__status-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: #DC2626;
-    margin-bottom: 6px;
-    box-shadow: 0 0 10px rgba(220, 38, 38, 0.7);
-    animation: dotPulse 1.6s infinite ease-in-out;
+  &__official {
+    display: block;
+    width: calc(100% - 32px);
+    margin: 24px 16px 0;
+    padding: 0;
+    background: none;
+    text-align: left;
   }
+}
 
-  &__requested-title {
-    font-size: 20px;
-    font-weight: 900;
-    line-height: 1.15;
-    color: #111827;
-    text-align: center;
-    letter-spacing: -0.4px;
-    margin-bottom: 6px;
-  }
+// Facility / not-supported tile
+.tile {
+  position: relative;
+  flex: 0 0 140px;
+  scroll-snap-align: start;
+  padding: 0 0 14px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid #F1EFEA;
+  box-shadow: 0 6px 16px -12px rgba(15, 23, 42, 0.3);
+  text-align: center;
 
-  &__view-link {
-    font-size: 13.5px;
-    font-weight: 800;
+  &__art {
+    display: grid;
+    place-items: center;
+    height: 92px;
+    border-radius: 17px 17px 0 0;
+    background: linear-gradient(160deg, #FFF1F1, #FDE2E2);
     color: #DC2626;
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-
-    i {
-      font-size: 11px;
-    }
+    font-size: 38px;
   }
 
-  // Card Text
-  &__card-info {
-    margin-bottom: auto;
-    padding: 8px 0 16px;
+  &__badge {
+    position: absolute;
+    top: 78px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    border: 3px solid #fff;
+    color: #fff;
+    font-size: 13px;
+
+    &--yes { background: #16A34A; }
+    &--no { background: #DC2626; }
   }
 
-  &__card-heading {
-    margin: 0 0 6px;
-    font-size: 23px;
-    font-weight: 800;
-    color: #FFFFFF;
-    letter-spacing: -0.3px;
-  }
-
-  &__card-subheading {
-    margin: 0;
-    font-size: 13.5px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.95);
-    letter-spacing: 0.2px;
-  }
-
-  // Dual Black Action Pills
-  &__action-row {
-    display: flex;
-    width: 100%;
-    gap: 12px;
-    justify-content: center;
-    margin-top: 14px;
-  }
-
-  &__action-pill {
-    flex: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background: #111827;
-    color: #FFFFFF;
-    text-decoration: none;
-    border: none;
-    border-radius: 999px;
-    padding: 15px 16px;
-    font-family: inherit;
-    font-size: 14px;
+  p {
+    margin: 20px 10px 0;
+    font-size: 13px;
     font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    line-height: 1.3;
+    color: #1F2937;
+  }
 
-    &:hover {
-      background: #000000;
-      transform: translateY(-1px);
-    }
-
-    &:active {
-      transform: scale(0.98);
-    }
-
-    i {
-      font-size: 14px;
-    }
+  &--no .tile__art {
+    background: linear-gradient(160deg, #F3F4F6, #E5E7EB);
+    color: #6B7280;
   }
 }
 
-// Wave & Dot Animations
-@keyframes pulseWave {
-  0% {
-    transform: scale(0.95);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scale(1.08);
-    opacity: 0.35;
-  }
-  100% {
-    transform: scale(1.15);
-    opacity: 0;
-  }
+@keyframes ahome-ping {
+  0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.55); }
+  100% { box-shadow: 0 0 0 9px rgba(22, 163, 74, 0); }
+}
+@keyframes ahome-ping-red {
+  0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.55); }
+  100% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ahome__live-dot, .ahome__booked-dot { animation: none; }
 }
 
-@keyframes dotPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.3);
-    opacity: 0.6;
-  }
+@media (max-width: 374px) {
+  .ahome__bar .brand-logo__word { font-size: 15px; }
+  .ahome__eta { font-size: 30px; }
 }
 
 // --- Pickup Spots Selector ---
@@ -422,68 +464,10 @@
   }
 }
 
-// --- More Services Modal Grid ---
-.services-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-
-  .service-card {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px;
-    border-radius: 16px;
-    background: #F8FAFC;
-    border: 1px solid #E2E8F0;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: #FFFFFF;
-      border-color: #CBD5E1;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      transform: translateY(-1px);
-    }
-
-    &__icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
-
-      &--red {
-        background: #FEE2E2;
-        color: #DC2626;
-      }
-      &--blue {
-        background: #E0F2FE;
-        color: #0284C7;
-      }
-      &--green {
-        background: #DCFCE7;
-        color: #16A34A;
-      }
-    }
-
-    h4 {
-      margin: 0 0 2px;
-      font-size: 15px;
-      font-weight: 700;
-      color: #1E293B;
-    }
-
-    p {
-      margin: 0;
-      font-size: 12.5px;
-      color: #64748B;
-      line-height: 1.4;
-    }
-  }
+.spots__item--gps {
+  background: #FEF2F2;
+  color: #991B1B;
+  font-weight: 800;
 }
 
 // --- Quick Menu List ---
@@ -527,177 +511,6 @@
       }
     }
   }
-}
-
-/* ===================================================================
-   Responsive fit: the whole Home screen fits exactly in one phone
-   screen (no scrolling, buttons never cut off). Sizes scale with the
-   screen height (dvh = visible height, ignoring the browser's bars).
-   =================================================================== */
-.home-screen {
-  height: 100dvh;
-  min-height: 0;
-  overflow: hidden;
-  box-sizing: border-box;
-  padding-top: calc(clamp(8px, 1.5dvh, 12px) + env(safe-area-inset-top));
-
-  &__protocol-wrapper { margin-bottom: clamp(8px, 1.6dvh, 14px); flex-shrink: 0; }
-  &__navbar { margin-bottom: clamp(8px, 1.8dvh, 18px); flex-shrink: 0; }
-  &__greeting-section { margin-bottom: clamp(10px, 2.2dvh, 18px); flex-shrink: 0; }
-  &__salutation { font-size: clamp(15px, 2.2dvh, 18px); }
-  &__user-name {
-    font-size: clamp(28px, 4.8dvh, 38px);
-    margin: 0 0 clamp(6px, 1.2dvh, 10px);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &__emergency-card {
-    min-height: 0;
-    padding-top: clamp(14px, 2.8dvh, 28px);
-    padding-bottom: calc(clamp(12px, 2.4dvh, 24px) + env(safe-area-inset-bottom));
-  }
-
-  // SOS button + rings scale together with the screen
-  &__pulse-container {
-    --sos: clamp(170px, 31dvh, 270px);
-    width: var(--sos);
-    height: var(--sos);
-    margin: auto auto clamp(6px, 1.4dvh, 14px); // centred in the red card
-  }
-  &__pulse-ring--outer { width: 98%; height: 98%; }
-  &__pulse-ring--mid { width: 82%; height: 82%; }
-  &__sos-button { width: 67%; height: 67%; }
-  &__sos-label { font-size: calc(var(--sos) * 0.21); }
-  &__sos-sublabel { font-size: clamp(12px, 1.7dvh, 13.5px); }
-  &__requested-title { font-size: clamp(16px, 2.5dvh, 20px); }
-
-  &__card-info { padding: 0 0 clamp(8px, 1.6dvh, 16px); }
-  &__card-heading { font-size: clamp(19px, 2.9dvh, 23px); }
-
-  &__action-row { margin-top: auto; flex-shrink: 0; }
-  &__action-pill {
-    padding: clamp(12px, 1.8dvh, 15px) 12px;
-    white-space: nowrap;
-    font-size: clamp(13px, 3.6vw, 14px);
-  }
-}
-
-// Very short screens (small phones, or with the keyboard/browser bars showing)
-@media (max-height: 640px) {
-  .home-screen__card-subheading { display: none; }
-  .home-screen__salutation { display: none; }
-}
-
-/* ===================== Interactive top section ===================== */
-.home-screen__protocol-wrapper {
-  display: block;
-  width: 100%;
-  padding: 0;
-  border: none;
-  background: none;
-  text-align: left;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  border-radius: 20px;
-  transition: transform 0.18s ease;
-  &:active { transform: scale(0.985); }
-}
-
-// Live service status under the name
-.home-screen__live {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 clamp(8px, 1.4dvh, 12px);
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #15803D;
-}
-.home-screen__live-dot {
-  position: relative;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #16A34A;
-  flex-shrink: 0;
-  &::after {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border-radius: 50%;
-    background: rgba(22, 163, 74, 0.35);
-    animation: home-ping 1.8s ease-out infinite;
-  }
-}
-
-// Location chip with a live GPS pulse
-.home-screen__location-chip { gap: 8px; padding-left: 10px; }
-.home-screen__gps {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  &::before {
-    content: '';
-    position: absolute;
-    inset: -3px;
-    border-radius: 50%;
-    background: rgba(220, 38, 38, 0.2);
-    animation: home-ping 2s ease-out infinite;
-  }
-  .home-screen__location-pin { position: relative; }
-}
-.home-screen__live-tag {
-  flex-shrink: 0;
-  margin-left: 2px;
-  padding: 2px 6px;
-  border-radius: 6px;
-  background: #FEE2E2;
-  color: #B91C1C;
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-}
-
-// Buttons give a small "press" feel
-.home-screen__lang-btn,
-.home-screen__menu-btn,
-.home-screen__location-chip,
-.home-screen__action-pill { transition: transform 0.15s ease, background 0.2s ease; }
-.home-screen__lang-btn:active,
-.home-screen__menu-btn:active,
-.home-screen__action-pill:active { transform: scale(0.95); }
-
-// Entrance: each block slides up one after another
-.home-anim {
-  animation: home-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: calc(var(--i, 0) * 70ms);
-}
-.home-anim--card { animation-name: home-card; }
-
-@keyframes home-rise {
-  0% { opacity: 0; transform: translateY(14px); }
-  100% { opacity: 1; transform: none; }
-}
-@keyframes home-card {
-  0% { opacity: 0; transform: translateY(40px); }
-  100% { opacity: 1; transform: none; }
-}
-@keyframes home-ping {
-  0% { transform: scale(0.6); opacity: 1; }
-  100% { transform: scale(1.8); opacity: 0; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .home-anim, .home-screen__live-dot::after, .home-screen__gps::before { animation: none; }
-}
-@media (max-height: 640px) {
-  .home-screen__live { display: none; }
 }
 
 /* ===================== Official info sheet ===================== */
@@ -769,13 +582,3 @@
   }
 }
 
-// Narrow phones (≤374px): keep the logo, menu and language button on one line
-@media (max-width: 374px) {
-  .home-screen__navbar {
-    gap: 6px;
-    .brand-logo__word { font-size: 15.5px; }
-    .brand-logo__sub { font-size: 8.5px; }
-  }
-  .home-screen__lang-btn { padding-left: 10px !important; padding-right: 10px !important; }
-  .home-screen__nav-actions { gap: 6px !important; }
-}

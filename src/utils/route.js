@@ -1,3 +1,5 @@
+import { hasMapbox, mapboxRoute } from './mapbox';
+
 // Turns one OSRM turn into a sentence for the driver
 function stepText(m, name) {
   const road = name ? ` onto ${name}` : '';
@@ -12,6 +14,14 @@ function stepText(m, name) {
 // Asks the OSRM routing service for the road path between two points.
 // from / to are [latitude, longitude]
 export async function fetchRoute(from, to) {
+  // Mapbox Directions when a token is set; the free OSRM demo server otherwise
+  if (hasMapbox) {
+    try {
+      return await mapboxRoute(from, to);
+    } catch {
+      /* fall back to OSRM below */
+    }
+  }
   const url =
     `https://router.project-osrm.org/route/v1/driving/` +
     `${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson&steps=true`;

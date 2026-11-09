@@ -1,42 +1,6 @@
-import { useEffect, useRef } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-
-// Free OpenStreetMap tiles – no API key needed.
-// (CARTO tiles now need an API key, which is why the map showed "API KEY REQUIRED".)
-// The tiles are shown slightly muted (see .tracking-map in Tracking.scss) so the red route stands out.
-const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-const ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors';
-
-const makeIcon = (cls, icon) =>
-  L.divIcon({
-    className: '',
-    html: `<div class="map-pin ${cls}"><i class="bi ${icon}"></i></div>`,
-    iconSize: [40, 40],
-    iconAnchor: [20, 20],
-  });
-
-// Ambulance seen from above (like the bike/car in Rapido & Swiggy). Nose points UP (north).
-const AMBULANCE_SVG = `
-<svg class="amb-top__svg" viewBox="0 0 40 72" width="26" height="46" aria-hidden="true">
-  <rect x="5" y="7" width="30" height="60" rx="8" fill="rgba(0,0,0,.18)" transform="translate(1.5 2.5)"/>
-  <rect x="5" y="5" width="30" height="62" rx="8" fill="#FFFFFF" stroke="#C9CED6" stroke-width="1"/>
-  <path d="M9 13 Q20 6 31 13 L30 21 Q20 17 10 21 Z" fill="#253041"/>
-  <rect x="9" y="27" width="22" height="5" rx="2" fill="#253041" opacity=".14"/>
-  <rect x="9" y="27" width="5" height="5" rx="1.5" class="amb-top__light amb-top__light--red"/>
-  <rect x="26" y="27" width="5" height="5" rx="1.5" class="amb-top__light amb-top__light--blue"/>
-  <path d="M17.5 37h5v5h5v5h-5v5h-5v-5h-5v-5h5z" fill="#E8474C"/>
-  <rect x="5" y="56" width="30" height="3.5" fill="#E8474C"/>
-  <rect x="7.5" y="62" width="25" height="3" rx="1.5" fill="#C9CED6"/>
-</svg>`;
-
-const ambulanceIcon = L.divIcon({
-  className: '',
-  html: `<div class="amb-top"><span class="amb-top__pulse"></span><div class="amb-top__body">${AMBULANCE_SVG}</div></div>`,
-  iconSize: [56, 56],
-  iconAnchor: [28, 28],
-});
+import { useEffect, useRef, useState } from 'react';
+import { createMap, whenReady, htmlMarker, boundsOf, setLine, toLngLat, hasMapbox } from '../../utils/mapbox';
+import { ambulanceHtml, labelledPinHtml, escapeHtml } from '../../utils/markers';
 
 // ---------- geometry helpers ----------
 const toRad = (d) => (d * Math.PI) / 180;
@@ -82,10 +46,14 @@ function cardSpace() {
   const card = document.querySelector('.track__card');
   return (card?.offsetHeight || 320) + 24;
 }
-const fitOpts = () => ({ paddingTopLeft: [56, 90], paddingBottomRight: [56, cardSpace()] });
+const fitPadding = () => ({ top: 90, left: 56, right: 56, bottom: cardSpace() });
 
 // Gentle start and stop, steady in the middle (like a real vehicle)
 const ease = (p) => (p < 0.08 ? (p * p) / 0.16 : p > 0.92 ? 0.92 - ((1 - p) * (1 - p)) / 0.16 : p - 0.04) / 0.92;
+
+const LINE_BEHIND = { 'line-color': '#9AA3AF', 'line-width': 5, 'line-opacity': 0.55 };
+const LINE_CASING = { 'line-color': '#FFFFFF', 'line-width': 9, 'line-opacity': 0.9 };
+const LINE_AHEAD = { 'line-color': '#E8474C', 'line-width': 5.5, 'line-opacity': 0.95 };
 
 // path = list of [lat, lng] points
 // startAt / durationMs = when the drive started and how long it takes (the map animates itself)
@@ -93,52 +61,54 @@ const ease = (p) => (p < 0.08 ? (p * p) / 0.16 : p > 0.92 ? 0.92 - ((1 - p) * (1
 export default function TrackingMap({ path, startAt, durationMs = 60000, done = false, hospital, patient }) {
   const mapEl = useRef(null);
   const mapRef = useRef(null);
-  const aheadRef = useRef(null);
-  const behindRef = useRef(null);
-  const casingRef = useRef(null);
   const markerRef = useRef(null);
   const hospitalRef = useRef(null);
   const routeRef = useRef(prepare(path || []));
   const headingRef = useRef(null);
   const timingRef = useRef({ startAt, durationMs, done });
-  timingRef.current = { startAt, durationMs, done };
+  useEffect(() => {
+    timingRef.current = { startAt, durationMs, done };
+  }, [startAt, durationMs, done]);
+  const [ready, setReady] = useState(false);
+
+  const fitTo = (points, animate = true) => {
+    const map = mapRef.current;
+    if (!map || !points?.length) return;
+    if (points.length === 1) {
+      map.jumpTo({ center: toLngLat(points[0]), zoom: 15 });
+      return;
+    }
+    map.fitBounds(boundsOf(points), { padding: fitPadding(), maxZoom: 17, duration: animate ? 800 : 0 });
+  };
 
   // Create the map once
   useEffect(() => {
     if (!mapEl.current) return;
-
-    const map = L.map(mapEl.current, { zoomControl: false, attributionControl: true, maxZoom: 19 });
+    const first = path?.[0] || patient;
+    const map = createMap(mapEl.current, { center: first, zoom: 14 });
     mapRef.current = map;
-    L.tileLayer(TILE_URL, { maxZoom: 19, attribution: ATTRIBUTION }).addTo(map);
-
-    // road already covered (grey) and road still ahead (red, with a white casing)
-    behindRef.current = L.polyline([], { color: '#9AA3AF', weight: 5, opacity: 0.55, lineCap: 'round', lineJoin: 'round' }).addTo(map);
-    casingRef.current = L.polyline(path || [], { color: '#FFFFFF', weight: 9, opacity: 0.9, lineCap: 'round', lineJoin: 'round' }).addTo(map);
-    aheadRef.current = L.polyline(path || [], { color: '#E8474C', weight: 5.5, opacity: 0.95, lineCap: 'round', lineJoin: 'round' }).addTo(map);
 
     if (patient) {
-      L.marker(patient, { icon: makeIcon('map-pin--patient', 'bi-person-fill'), zIndexOffset: 500 })
-        .addTo(map)
-        .bindTooltip('You are here', { permanent: true, direction: 'top', offset: [0, -22], className: 'map-label' });
+      htmlMarker(labelledPinHtml('map-pin--patient', 'bi-person-fill', 'You are here'), { anchor: 'bottom' })
+        .setLngLat(toLngLat(patient))
+        .addTo(map);
     }
-
     if (path && path.length > 0) {
-      markerRef.current = L.marker(path[0], { icon: ambulanceIcon, zIndexOffset: 1000, keyboard: false }).addTo(map);
-      try {
-        map.fitBounds(L.latLngBounds([...path, ...(patient ? [patient] : [])]), fitOpts());
-      } catch {
-        map.setView(path[0], 15);
-      }
+      markerRef.current = htmlMarker(ambulanceHtml()).setLngLat(toLngLat(path[0])).addTo(map);
     }
 
-    // re-fit once the bottom card has its real height
+    whenReady(map, () => {
+      // road already covered (grey) and road still ahead (red, with a white casing)
+      setLine(map, 'trk-behind', [], LINE_BEHIND);
+      setLine(map, 'trk-casing', path || [], LINE_CASING);
+      setLine(map, 'trk-ahead', path || [], LINE_AHEAD);
+      setReady(true);
+    });
+
+    // fit once the bottom card has its real height
     const timer = setTimeout(() => {
-      map.invalidateSize();
-      try {
-        if (path?.length) map.fitBounds(L.latLngBounds([...path, ...(patient ? [patient] : [])]), fitOpts());
-      } catch {
-        /* ignore */
-      }
+      map.resize();
+      fitTo([...(path || []), ...(patient ? [patient] : [])], false);
     }, 150);
     return () => {
       clearTimeout(timer);
@@ -151,36 +121,39 @@ export default function TrackingMap({ path, startAt, durationMs = 60000, done = 
   useEffect(() => {
     routeRef.current = prepare(path || []);
     headingRef.current = null;
-    if (!aheadRef.current || !mapRef.current || !path || path.length === 0) return;
-    aheadRef.current.setLatLngs(path);
-    casingRef.current?.setLatLngs(path);
-    behindRef.current.setLatLngs([]);
-    try {
-      mapRef.current.fitBounds(L.latLngBounds(path), fitOpts());
-    } catch {
-      /* empty bounds */
-    }
-  }, [path]);
+    const map = mapRef.current;
+    if (!map || !ready || !path || path.length === 0) return;
+    setLine(map, 'trk-ahead', path, LINE_AHEAD);
+    setLine(map, 'trk-casing', path, LINE_CASING);
+    setLine(map, 'trk-behind', [], LINE_BEHIND);
+    if (!markerRef.current) markerRef.current = htmlMarker(ambulanceHtml()).setLngLat(toLngLat(path[0])).addTo(map);
+    fitTo(path);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [path, ready]);
 
   // Hospital pin once the crew has chosen it
+  const hLat = hospital?.position?.[0];
+  const hLng = hospital?.position?.[1];
+  const hName = hospital?.name;
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    if (hospitalRef.current) {
-      hospitalRef.current.remove();
-      hospitalRef.current = null;
+    hospitalRef.current?.remove();
+    hospitalRef.current = null;
+    if (hLat !== undefined) {
+      hospitalRef.current = htmlMarker(labelledPinHtml('map-pin--hospital', 'bi-hospital-fill', escapeHtml(hName)), {
+        anchor: 'bottom',
+      })
+        .setLngLat([hLng, hLat])
+        .addTo(map);
     }
-    if (hospital?.position) {
-      hospitalRef.current = L.marker(hospital.position, { icon: makeIcon('map-pin--hospital', 'bi-hospital-fill'), zIndexOffset: 400 })
-        .addTo(map)
-        .bindTooltip(hospital.name, { permanent: true, direction: 'top', offset: [0, -22], className: 'map-label' });
-    }
-  }, [hospital?.position?.[0], hospital?.position?.[1], hospital?.name]);
+  }, [hLat, hLng, hName]);
 
   // 60 fps animation: glide along the road, turn with it, follow it
   useEffect(() => {
     let raf;
     let lastFollow = 0;
+    let lastLine = 0;
     const tick = (now) => {
       raf = requestAnimationFrame(tick);
       const route = routeRef.current;
@@ -192,7 +165,7 @@ export default function TrackingMap({ path, startAt, durationMs = 60000, done = 
       const raw = isDone ? 1 : s ? (Date.now() - s) / dur : 0;
       const p = ease(Math.max(0, Math.min(1, raw)));
       const { pos, heading, index } = pointAt(route, p);
-      marker.setLatLng(pos);
+      marker.setLngLat(toLngLat(pos));
 
       // smooth turning: always rotate the short way round
       if (headingRef.current === null) headingRef.current = heading;
@@ -203,23 +176,25 @@ export default function TrackingMap({ path, startAt, durationMs = 60000, done = 
       if (body) body.style.transform = `rotate(${headingRef.current}deg)`;
       el?.firstElementChild?.classList.toggle('amb-top--arrived', p >= 1);
 
-      // covered road turns grey, the rest stays red
-      const behind = route.path.slice(0, index).concat([pos]);
-      const ahead = [pos].concat(route.path.slice(index));
-      behindRef.current.setLatLngs(behind);
-      aheadRef.current.setLatLngs(ahead);
-      casingRef.current?.setLatLngs(ahead);
+      // covered road turns grey, the rest stays red (about 20 updates a second is plenty)
+      if (map.isStyleLoaded() && now - lastLine > 50) {
+        lastLine = now;
+        const behind = route.path.slice(0, index).concat([pos]);
+        const ahead = [pos].concat(route.path.slice(index));
+        setLine(map, 'trk-behind', behind, LINE_BEHIND);
+        setLine(map, 'trk-ahead', ahead, LINE_AHEAD);
+        setLine(map, 'trk-casing', ahead, LINE_CASING);
+      }
 
       // keep the ambulance in the visible part of the map, above the card (check twice a second)
-      if (now - lastFollow > 500) {
+      if (now - lastFollow > 500 && !map.isMoving()) {
         lastFollow = now;
-        const size = map.getSize();
-        const bottom = size.y - cardSpace();
-        const pt = map.latLngToContainerPoint(pos);
+        const { clientWidth: w, clientHeight: h } = map.getContainer();
+        const bottom = h - cardSpace();
+        const pt = map.project(toLngLat(pos));
         const margin = 60;
-        if (pt.x < margin || pt.x > size.x - margin || pt.y < 90 || pt.y > bottom - margin) {
-          const target = L.point(size.x / 2, (90 + bottom) / 2);
-          map.panBy(pt.subtract(target), { animate: true, duration: 1.2, easeLinearity: 0.25 });
+        if (pt.x < margin || pt.x > w - margin || pt.y < 90 || pt.y > bottom - margin) {
+          map.panBy([pt.x - w / 2, pt.y - (90 + bottom) / 2], { duration: 1200 });
         }
       }
     };
@@ -227,5 +202,10 @@ export default function TrackingMap({ path, startAt, durationMs = 60000, done = 
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  return <div ref={mapEl} className="tracking-map" />;
+  return (
+    <div className="tracking-map">
+      <div ref={mapEl} className="tracking-map__canvas" />
+      {!hasMapbox && <span className="tracking-map__notice">Map preview · add VITE_MAPBOX_TOKEN to .env</span>}
+    </div>
+  );
 }

@@ -1,213 +1,298 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { user as mockUser } from '../../mock/user';
 import { useAuth } from '../../context/AuthContext';
-import Sheet from '../../components/Sheet';
-import { pickupSpots } from '../../mock/ambulance';
-import { getPickup, savePickup } from '../../utils/dispatch';
 import { useBooking } from '../../context/BookingContext';
-import ProtocolLeaders, { LEADERS } from '../../components/ProtocolLeaders';
+import Sheet from '../../components/Sheet';
 import BrandLogo from '../../components/BrandLogo';
-import { ambulanceUnits } from '../../mock/ambulance';
+import ProtocolLeaders, { LEADERS } from '../../components/ProtocolLeaders';
+import AmbulanceArt from '../../components/AmbulanceArt';
+import HomeMap from '../../components/HomeMap';
+import BookingSheet from './BookingSheet';
+import useNearestAmbulances from '../../hooks/useNearestAmbulances';
+import { pickupSpots } from '../../mock/ambulance';
+import { facilities, notSupported, stats, crew } from '../../mock/ambulanceInfo';
+import { getPickup, savePickup } from '../../utils/dispatch';
+import { reverseGeocode } from '../../utils/mapbox';
+import { addTrip } from '../../utils/trips';
 import './Home.scss';
 
+const TEXT = {
+  en: {
+    in: 'Ambulance in',
+    minutes: (n) => `${n} minute${n === 1 ? '' : 's'}`,
+    finding: 'Finding ambulances…',
+    busy: 'All ambulances busy',
+    request: 'Request Ambulance',
+    lang: 'తెలుగు',
+  },
+  te: {
+    in: 'అంబులెన్స్',
+    minutes: (n) => `${n} నిమిషాల్లో`,
+    finding: 'అంబులెన్స్ కోసం వెతుకుతోంది…',
+    busy: 'అంబులెన్స్‌లు అందుబాటులో లేవు',
+    request: 'అంబులెన్స్ బుక్ చేయండి',
+    lang: 'English',
+  },
+};
+
+// Counts up to a number when it scrolls into view
+function CountUp({ to }) {
+  const ref = useRef(null);
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let raf;
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      const start = performance.now();
+      const step = (t) => {
+        const p = Math.min(1, (t - start) / 1400);
+        setN(Math.round(to * (1 - Math.pow(1 - p, 3))));
+        if (p < 1) raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    });
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      cancelAnimationFrame(raf);
+    };
+  }, [to]);
+  return <span ref={ref}>{n.toLocaleString('en-IN')}</span>;
+}
+
 export default function Home() {
-  const { user: account, logout } = useAuth();
-  const user = { ...mockUser, name: account?.name || mockUser.name || 'Suresh' };
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const { booking, createBooking } = useBooking();
 
+  const [lang, setLang] = useState('en');
+  const t = TEXT[lang];
   const [pickup, setPickup] = useState(getPickup);
+  const [bookOpen, setBookOpen] = useState(false);
   const [spotOpen, setSpotOpen] = useState(false);
-  const [servicesOpen, setServicesOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [officialOpen, setOfficialOpen] = useState(false);
+  const [locating, setLocating] = useState(false);
 
-  // Greeting changes with the time of day
-  const hour = new Date().getHours();
-  const timeGreeting = hour < 12 ? 'Good morning,' : hour < 17 ? 'Good afternoon,' : 'Good evening,';
-  const onDuty = ambulanceUnits.length;
-  const tap = () => navigator.vibrate?.(10);
-  const [lang, setLang] = useState('te'); // 'te' (Telugu) | 'en' (English)
-
-  // Active booking detection
+  const { nearest, others, loading } = useNearestAmbulances(pickup, booking);
   const isBooked = Boolean(booking && booking.status && booking.status !== 'completed');
 
-  // Direct 1-tap SOS: immediately creates the booking and navigates straight to tracking
-  const handleSosClick = () => {
-    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  const choosePickup = (spot) => {
+    savePickup(spot.id === 'pin' || !spot.id ? spot : spot.id);
+    setPickup(spot);
+    setSpotOpen(false);
+  };
+
+  const useMyLocation = () => {
+    if (!navigator.geolocation) return;
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const at = [pos.coords.latitude, pos.coords.longitude];
+        const place = (await reverseGeocode(at)) || { name: 'Current location', address: 'Your current location' };
+        setLocating(false);
+        choosePickup({ id: 'pin', lat: at[0], lng: at[1], ...place });
+      },
+      () => setLocating(false),
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  };
+
+  // Emergency: save the pin as the pickup, create the booking, go to live tracking
+  const handleEmergency = ({ pickup: spot }) => {
+    savePickup(spot);
+    setPickup({ id: 'pin', ...spot });
+    navigator.vibrate?.([200, 100, 200]);
     createBooking({ type: 'emergency', forWhom: 'me' });
+    setBookOpen(false);
     navigate('/tracking');
   };
 
-  const handleServiceSelect = (serviceType) => {
-    setServicesOpen(false);
-    createBooking({ type: serviceType, forWhom: 'me' });
-    navigate('/tracking');
-  };
-
-  const toggleLanguage = () => {
-    setLang((prev) => (prev === 'te' ? 'en' : 'te'));
+  // Planned transfer: saved as a booked trip (free), shown under Trips
+  const handlePlanned = ({ pickup: spot, drop, when }) => {
+    addTrip({
+      kind: 'scheduled',
+      title: 'Planned transfer',
+      patient: user?.name || '',
+      pickup: spot.address,
+      destination: drop.name,
+      whenText: when.toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }),
+    });
+    setBookOpen(false);
+    navigate('/trips', { state: { banner: 'Your planned transfer is booked. It is free of cost.' } });
   };
 
   return (
-    <div className="home-screen">
-      {/* --- Top Official Protocol Leadership Ribbon --- */}
-      <button
-        type="button"
-        className="home-screen__protocol-wrapper home-anim"
-        style={{ '--i': 0 }}
-        onClick={() => {
-          tap();
-          setOfficialOpen(true);
-        }}
-        aria-label="About this Government of Andhra Pradesh service"
-      >
-        <ProtocolLeaders variant="ribbon" size="lg" />
-      </button>
-
-      {/* --- Top App Bar (108 Ambulance + Language + Menu) --- */}
-      <header className="home-screen__navbar home-anim" style={{ '--i': 1 }}>
-        <div className="home-screen__brand">
-          <BrandLogo size={38} layout="pair" sub="Govt. of A.P." />
+    <div className="ahome">
+      {/* ---------- Header ---------- */}
+      <header className="ahome__head">
+        <div className="ahome__bar">
+          <button type="button" className="ahome__brand" onClick={() => setOfficialOpen(true)} aria-label="About this service">
+            <BrandLogo size={30} layout="pair" sub="Govt. of A.P." />
+          </button>
+          <div className="ahome__actions">
+            <button type="button" className="ahome__lang" onClick={() => setLang(lang === 'en' ? 'te' : 'en')}>
+              {t.lang}
+            </button>
+            <button type="button" className="ahome__icon-btn" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+              <i className="bi bi-person-fill" />
+            </button>
+          </div>
         </div>
 
-        <div className="home-screen__nav-actions">
-          <button
-            type="button"
-            className="home-screen__lang-btn"
-            onClick={toggleLanguage}
-            aria-label="Toggle language"
-          >
-            {lang === 'te' ? 'తెలుగు' : 'English'}
-          </button>
+        {loading ? (
+          <h1 className="ahome__eta ahome__eta--muted">{t.finding}</h1>
+        ) : nearest ? (
+          <>
+            <p className="ahome__eta-label">{t.in}</p>
+            <h1 className="ahome__eta">{t.minutes(nearest.minutes)}</h1>
+          </>
+        ) : (
+          <h1 className="ahome__eta ahome__eta--muted">{t.busy}</h1>
+        )}
 
-          <button
-            type="button"
-            className="home-screen__menu-btn"
-            onClick={() => setMenuOpen(true)}
-            aria-label="Open menu"
-          >
-            <i className="bi bi-list" />
-          </button>
-        </div>
+        <button type="button" className="ahome__address" onClick={() => setSpotOpen(true)}>
+          <span>{pickup.name || pickup.address}</span>
+          <i className="bi bi-caret-down-fill" />
+        </button>
       </header>
 
-      {/* --- Greeting & User Identity --- */}
-      <section className="home-screen__greeting-section">
-        <p className="home-screen__salutation home-anim" style={{ '--i': 2 }}>
-          {lang === 'te' ? 'Namaskaram,' : timeGreeting}
-        </p>
-        <h1 className="home-screen__user-name home-anim" style={{ '--i': 3 }}>{user.name}</h1>
+      {/* ---------- Map ---------- */}
+      <div className="ahome__map">
+        <HomeMap pickup={pickup} nearest={nearest} others={others} onPickupClick={() => setBookOpen(true)} />
+      </div>
 
-        {/* Live service status */}
-        <p className="home-screen__live home-anim" style={{ '--i': 4 }}>
-          <span className="home-screen__live-dot" />
-          {onDuty} ambulances on duty near you · avg 7 min
-        </p>
-
-        {/* Location Chip (live GPS) */}
-        <button
-          type="button"
-          className="home-screen__location-chip home-anim"
-          style={{ '--i': 5 }}
-          onClick={() => {
-            tap();
-            setSpotOpen(true);
-          }}
-        >
-          <span className="home-screen__gps">
-            <i className="bi bi-geo-alt-fill home-screen__location-pin" />
-          </span>
-          <span className="home-screen__location-text">{pickup.address}</span>
-          <span className="home-screen__live-tag">LIVE</span>
-        </button>
-      </section>
-
-      {/* --- Main Red Emergency Card (Fills down to the bottom edge) --- */}
-      <section className="home-screen__emergency-card home-anim home-anim--card" style={{ '--i': 6 }}>
-        {/* Pulsing Outer Concentric Rings */}
-        <div className="home-screen__pulse-container">
-          <span className="home-screen__pulse-ring home-screen__pulse-ring--outer" />
-          <span className="home-screen__pulse-ring home-screen__pulse-ring--mid" />
-
-          {/* Center Circle: Shows 'Ambulance requested' if booked, or 'SOS' if idle */}
-          {isBooked ? (
-            <button
-              type="button"
-              className="home-screen__sos-button home-screen__sos-button--requested"
-              onClick={() => navigate('/tracking')}
-              aria-label="Ambulance requested. Tap to view live tracking."
-            >
-              <span className="home-screen__status-dot" />
-              <span className="home-screen__requested-title">
-                Ambulance<br />requested
-              </span>
-              <span className="home-screen__view-link">
-                View <i className="bi bi-chevron-right" />
-              </span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="home-screen__sos-button"
-              onClick={handleSosClick}
-              aria-label="Emergency SOS. Tap once to book an ambulance."
-            >
-              <span className="home-screen__sos-label">SOS</span>
-              <span className="home-screen__sos-sublabel">
-                {lang === 'te' ? 'Tap once' : 'Tap once'}
-              </span>
-            </button>
-          )}
-        </div>
-
-        {/* Card Typography */}
-        <div className="home-screen__card-info">
-          <h2 className="home-screen__card-heading">An ambulance comes to you</h2>
-          <p className="home-screen__card-subheading">
-            {isBooked
-              ? 'Your live location is shared automatically'
-              : 'ఒక్కసారి నొక్కండి - అంబులెన్స్ మీ దగ్గరకు'}
-          </p>
-        </div>
-
-        {/* Bottom Actions Row (Dual Black Pills) */}
-        <div className="home-screen__action-row">
-          <a
-            href="tel:108"
-            className="home-screen__action-pill"
-            aria-label="Direct call 108 emergency service"
-          >
-            <i className="bi bi-telephone-fill" />
-            <span>Call 108</span>
-          </a>
-
-          <button
-            type="button"
-            className="home-screen__action-pill"
-            onClick={() => setServicesOpen(true)}
-            aria-label="View more emergency services"
-          >
-            <span>More services</span>
-            <i className="bi bi-arrow-right" />
+      {/* ---------- Request card ---------- */}
+      <section className="ahome__request">
+        {isBooked ? (
+          <button type="button" className="ahome__booked" onClick={() => navigate('/tracking')}>
+            <span className="ahome__booked-dot" />
+            <span>
+              <strong>Ambulance requested</strong>
+              <small>Tap to see live tracking</small>
+            </span>
+            <i className="bi bi-chevron-right" />
           </button>
+        ) : (
+          <button type="button" className="ahome__cta" onClick={() => setBookOpen(true)}>
+            {t.request}
+          </button>
+        )}
+        <p className="ahome__free">
+          <b>FREE</b> for all emergencies
+        </p>
+        <p className="ahome__free-sub">Planned transfers for OPD visits &amp; discharge are free too</p>
+        <a className="ahome__call" href="tel:108">
+          <i className="bi bi-telephone-fill" /> Can't book? Call 108
+        </a>
+      </section>
+
+      {/* ---------- On-board facilities ---------- */}
+      <section className="ahome__section">
+        <h2>On-board facilities</h2>
+        <div className="ahome__row">
+          {facilities.map((f) => (
+            <div key={f.id} className="tile">
+              <span className="tile__art"><i className={`bi ${f.icon}`} /></span>
+              <span className="tile__badge tile__badge--yes"><i className="bi bi-check-lg" /></span>
+              <p>{f.label}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* --- Location Selector Sheet --- */}
+      {/* ---------- Not supported ---------- */}
+      <section className="ahome__section">
+        <h2>We do not support</h2>
+        <div className="ahome__row">
+          {notSupported.map((f) => (
+            <div key={f.id} className="tile tile--no">
+              <span className="tile__art"><i className={`bi ${f.icon}`} /></span>
+              <span className="tile__badge tile__badge--no"><i className="bi bi-x-lg" /></span>
+              <p>{f.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ---------- Stats ---------- */}
+      <section className="ahome__stats">
+        <p className="ahome__stats-num"><CountUp to={stats.total} /></p>
+        <p className="ahome__stats-title">Safe transfers so far</p>
+        <p className="ahome__stats-area">{stats.area}</p>
+        <div className="ahome__stat-tiles">
+          {stats.tiles.map((s) => (
+            <div key={s.id} className="ahome__stat">
+              <b>{s.value}</b>
+              <span>{s.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ---------- Crew ---------- */}
+      <section className="ahome__crew">
+        <div className="ahome__art"><AmbulanceArt blob={false} /></div>
+        <div className="ahome__crew-card">
+          <h2>Ambulance staff</h2>
+          <p className="ahome__crew-sub">Trained and ready to give expert care</p>
+          {crew.map((c) => (
+            <div key={c.id} className="ahome__member">
+              <span className="ahome__avatar">
+                <i className={`bi ${c.icon}`} />
+                <i className="bi bi-patch-check-fill ahome__verified" />
+              </span>
+              <span>
+                <strong>{c.title}</strong>
+                <small>{c.text}</small>
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <button type="button" className="ahome__official" onClick={() => setOfficialOpen(true)}>
+        <ProtocolLeaders variant="ribbon" size="md" />
+      </button>
+
+      {/* ---------- Booking flow ---------- */}
+      {bookOpen && (
+        <BookingSheet
+          initialPickup={pickup}
+          booking={booking}
+          onClose={() => setBookOpen(false)}
+          onEmergency={handleEmergency}
+          onPlanned={handlePlanned}
+        />
+      )}
+
+      {/* ---------- Where are you? ---------- */}
       <Sheet open={spotOpen} onClose={() => setSpotOpen(false)} title="Where are you?">
         <div className="spots">
+          <button type="button" className="spots__item spots__item--gps" onClick={useMyLocation}>
+            <i className="bi bi-crosshair" />
+            <span>{locating ? 'Getting your location…' : 'Use my current location'}</span>
+          </button>
+          <button
+            type="button"
+            className="spots__item"
+            onClick={() => {
+              setSpotOpen(false);
+              setBookOpen(true);
+            }}
+          >
+            <i className="bi bi-pin-map-fill" />
+            <span>Set location on map</span>
+          </button>
           {pickupSpots.map((s) => (
             <button
               key={s.id}
               type="button"
               className={`spots__item ${pickup.id === s.id ? 'spots__item--active' : ''}`}
-              onClick={() => {
-                savePickup(s.id);
-                setPickup(s);
-                setSpotOpen(false);
-              }}
+              onClick={() => choosePickup(s)}
             >
               <i className="bi bi-geo-alt-fill" />
               <span>{s.address}</span>
@@ -216,7 +301,7 @@ export default function Home() {
         </div>
       </Sheet>
 
-      {/* --- Official service info (tap the Govt. strip) --- */}
+      {/* ---------- Official service info ---------- */}
       <Sheet open={officialOpen} onClose={() => setOfficialOpen(false)} title="Official Government Service">
         <div className="official-card">
           <div className="official-card__head">
@@ -245,39 +330,12 @@ export default function Home() {
         </div>
       </Sheet>
 
-      {/* --- More Services Sheet --- */}
-      <Sheet open={servicesOpen} onClose={() => setServicesOpen(false)} title="Emergency Services">
-        <div className="services-grid">
-          <div className="service-card" onClick={() => handleServiceSelect('general')}>
-            <div className="service-card__icon service-card__icon--red"><i className="bi bi-truck-front-fill" /></div>
-            <div>
-              <h4>Basic Life Support (BLS)</h4>
-              <p>For immediate stabilization and fast transport.</p>
-            </div>
-          </div>
-          <div className="service-card" onClick={() => handleServiceSelect('cardiac')}>
-            <div className="service-card__icon service-card__icon--blue"><i className="bi bi-heart-pulse-fill" /></div>
-            <div>
-              <h4>Advanced Cardiac Care (ALS)</h4>
-              <p>Equipped with ventilators, monitors &amp; paramedics.</p>
-            </div>
-          </div>
-          <div className="service-card" onClick={() => { setServicesOpen(false); navigate('/first-aid'); }}>
-            <div className="service-card__icon service-card__icon--green"><i className="bi bi-shield-plus" /></div>
-            <div>
-              <h4>First Aid Guide</h4>
-              <p>Step-by-step CPR and immediate emergency guides.</p>
-            </div>
-          </div>
-        </div>
-      </Sheet>
-
-      {/* --- Quick Side Drawer / Menu Sheet --- */}
+      {/* ---------- Menu ---------- */}
       <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title="108 Emergency Portal">
         <div className="menu-list">
           <button type="button" className="menu-item" onClick={() => { setMenuOpen(false); navigate('/profile'); }}>
             <i className="bi bi-person-circle" />
-            <span>My Profile ({user.name})</span>
+            <span>My Profile{user?.name ? ` (${user.name})` : ''}</span>
           </button>
           <button type="button" className="menu-item" onClick={() => { setMenuOpen(false); navigate('/trips'); }}>
             <i className="bi bi-clock-history" />

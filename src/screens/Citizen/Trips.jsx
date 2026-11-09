@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import TripForm from './TripForm';
 import { tripKinds } from '../../mock/trips';
 import { getTrips, cancelTrip } from '../../utils/trips';
@@ -12,9 +12,19 @@ const STATUS_TEXT = {
 };
 export default function Trips() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [kind, setKind] = useState(null); // which form is open
   const [trips, setTrips] = useState(getTrips);
-  const [banner, setBanner] = useState('');
+  // A planned transfer booked from Home arrives with a confirmation message
+  const [banner, setBanner] = useState(location.state?.banner || '');
+
+  useEffect(() => {
+    if (!location.state?.banner) return;
+    navigate(location.pathname, { replace: true, state: null });
+    const t = setTimeout(() => setBanner(''), 5000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSaved = () => {
     setTrips(getTrips());
@@ -39,7 +49,7 @@ export default function Trips() {
 
       <button className="trips__sos" onClick={() => navigate('/')}>
         <i className="bi bi-exclamation-triangle-fill" />
-        <span>In an emergency? <b>Use the SOS button</b> instead.</span>
+        <span>In an emergency? <b>Request an ambulance</b> from Home.</span>
         <i className="bi bi-chevron-right" />
       </button>
 
